@@ -1,0 +1,402 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml"
+                xmlns:jmoordbcorejsf="http://xmlns.jcp.org/jsf/composite/jmoordbcorejsf"
+                xmlns:dashboard="http://xmlns.jcp.org/jsf/composite/dashboard"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf"
+                xmlns:tipotarjeta="http://xmlns.jcp.org/jsf/composite/tipotarjeta"
+                xmlns:utilidades="http://xmlns.jcp.org/jsf/composite/utilidades">
+
+    <ui:define name="title">#{conf['application.title']}</ui:define>
+
+    <ui:define name="breadcrumb">
+
+        <p:commandLink action="tipotarjeta" value="#{msg['breadcrumb.grupotipotarjeta']}">
+        </p:commandLink>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="form" enctype="multipart/form-data" prependId="false"  rendered="#{p:ifAnyGranted('COORDINADOR-FACULTAD, DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD,SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}">
+            <p:growl id="growl"/>
+            <script type="text/javascript">
+                function setDataTableWithPageStart() {
+
+                    widgetVardataTable.getPaginator().setPage(0);
+                }
+            </script>
+<!--            <div class="block-category-title">#{msg['form.tipoprueba']}</div>-->
+
+            <!--<pb:blockViewerCore header="Sidebar" >-->
+            <div class="min-h-screen flex relative lg:static surface-ground">
+                <dashboard:configleftmenu/>
+                <div class="min-h-screen flex flex-column relative flex-auto">
+                    <!--                    <dashboard:top/>-->
+                    <div class="surface-section , jmoordbcore-max-width2000">
+                        <div class="grid">
+
+                            <div class="col-12 lg:col-10">
+                                <div class="grid formgrid ui-fluid">
+                                    <div class="field mb-4 col-12">
+                                        <label  class="font-bold">#{msg['form.tipoprueba']}</label>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-12 lg:col-10">
+                                <div class="grid formgrid ui-fluid">
+                                    <div class="field mb-4 col-12">
+
+
+                                    </div>
+                                </div>
+                                <div class="field mb-8 col-8">
+                                    <div class="field">
+                                        <p:outputLabel  value="#{msg['label.tipoprueba']}" />
+                                        <!--<span class="ui-float-label">-->
+                                        <p:autoComplete id="tipoprueba" multiple="false" 
+                                                        value="#{tipoPruebaFaces.tipoPruebaSelectedAutocomplete}"
+                                                        completeMethod="#{tipoPruebaFaces.completeTipoPrueba}"
+                                                        var="tipoprueba" 
+                                                        itemLabel="#{tipoprueba.tipoPrueba}" 
+                                                        itemValue="#{tipoprueba}"
+                                                        forceSelection="true"
+                                                        title="#{msg['autocomplete.minimo3caracteres']}"
+                                                        dropdown="true"
+                                                        minQueryLength="3"
+                                                        scrollHeight="250"
+
+                                                        converter="#{tipoPruebaConverter}"
+                                                        >
+                                            <p:column>
+                                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{tipoprueba.tipoPrueba}"/>
+                                            </p:column>
+                                            <p:ajax event="itemSelect"   listener="#{tipoPruebaFaces.autocompleteSelectedEvent}"  update=":form:growl, tipoprueba, dataTable" />  
+                                            <p:ajax event="itemUnselect"  process="@this" listener="#{tipoPruebaFaces.autocompleteUnselectListener}" update=":form:growl, tipoprueba, dataTable" />
+                                        </p:autoComplete>
+
+                                        <p:message for="@previous" />
+
+
+                                        <!--</span>-->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 lg:col-12">
+                                <p:dataTable style="border-style: none" 
+                                             var="item" 
+                                             value="#{tipoPruebaFaces.tipoPruebaLazyDataModel}"
+                                             binding="#{tipoPruebaFaces.dataTable}"
+                                             id="dataTable"
+                                             widgetVar="widgetVardataTable"
+                                             lazy="true"
+                                             paginator="true"
+                                             rows="#{tipoPruebaFaces.rowPageSmall.get()}"
+                                             paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                             paginatorPosition="both"
+                                             resizableColumns="true" 
+                                             liveResize="true"
+
+                                             rowKey="#{item.idtipoprueba}"
+                                             selection="#{tipoPruebaFaces.tipoPruebaSelected}"
+
+                                             class="table-auto"
+                                             >
+
+                                    <p:column class="column1">
+                                        <p:rowToggler/>
+                                    </p:column>
+                                    <p:column class="column1" headerText="#{msg['label.idtipoprueba']}" >
+                                        <p:outputLabel value="#{item.idtipoprueba}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column8" headerText="#{msg['label.tipoprueba']}" >
+                                        <p:outputLabel value="#{item.tipoPrueba}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column1" headerText="#{msg['label.active']}" >                                     
+                                        <p:selectBooleanCheckbox value="#{item.active}" disabled="true" style="float:left"/> 
+                                    </p:column>
+                                    <p:rowExpansion >
+                                        <div class="card">
+                                              <p:dataTable 
+                                            value="#{item.observacionTipoPrueba}"
+                                            var="itemObservacion"
+                                            >
+                                            <p:column>
+                                                <jmoordbcorejsf:outputLabelLarge text="#{itemObservacion.observacion}"  />
+
+                                            </p:column>
+                                        </p:dataTable> 
+                                        </div>
+                                     
+                                    </p:rowExpansion>
+
+                                    <p:column class="column1" exportable="false">
+                                        <p:menuButton  icon="pi pi-ellipsis-v" buttonStyleClass="ui-button-flat ui-button-plain rounded-button" >
+
+                                            <p:menuitem 
+                                                icon="pi pi-pencil" 
+
+                                                value="#{core['button.update']}"
+                                                update=":form:growl, outputPanelTipoPrueba"
+                                                oncomplete="PF('overlayPanelTipoPrueba').show('#{component.clientId}')"
+                                                action="#{tipoPruebaFaces.prepareTipoPrueba(item)}"
+                                                styleClass="edit-button rounded-button ui-button-success" process="@this"/>       
+
+
+
+
+                                        </p:menuButton>
+                                    </p:column>
+
+
+
+
+
+                                    <f:facet name="header">
+                                        <p:menuButton  icon="pi pi-ellipsis-v" buttonStyleClass="ui-button-ui-button-outlined ui-button-plain rounded-button" collision="flipfit"
+                                                       >
+
+                                            <p:menuitem 
+                                                title="#{core['button.add']}" 
+                                                value="#{core['button.add']}" 
+                                                rendered="#{tipoPruebaFaces.isEditable}"
+                                                update=":form:growl, outputPanelTipoPrueba"
+                                                icon="pi pi-plus-circle" styleClass="rounded-button mr-2 ui-button-summary"
+                                                oncomplete="PF('overlayPanelTipoPrueba').show('#{component.clientId}')"
+                                                action="#{tipoPruebaFaces.agregarRowTipoPrueba()}" />
+
+                                            <p:menuitem 
+                                                title="#{core['button.print']}"
+                                                value="#{core['button.print']}"
+                                                icon="pi pi-print"
+                                                id="buttonPrint"
+                                                process="buttonPrint"
+                                                ajax="false"
+                                                immediate="true"
+                                                target="_blank"
+                                                action="#{tipoPruebaFaces.printAll()}"
+                                                update=":form:growl"
+                                                styleClass="rounded-button ui-button-secondary" 
+                                                style="margin-right: .5rem"/>
+
+
+                                            <p:menuitem 
+                                                title="#{msg['button.refresh']}" 
+                                                value="#{msg['button.refresh']}" 
+                                                icon="pi pi-refresh" styleClass="rounded-button ui-button-help mr-2"
+                                                action="#{tipoPruebaFaces.refresh()}"
+                                                process="@this"
+                                                update=":form:growl, dataTable"/>
+                                        </p:menuButton>
+                                    </f:facet>
+
+                                </p:dataTable>
+
+                            </div>
+                        </div>
+
+
+
+
+
+                    </div> 
+
+                </div>
+            </div>
+
+            <p:confirmPopup global="true">
+                <p:commandButton value="#{core['button.no']}" type="button" styleClass="ui-confirm-popup-no ui-button-flat"/>
+                <p:commandButton value="#{core['button.yes']}" type="button" styleClass="ui-confirm-popup-yes" />
+            </p:confirmPopup>
+
+
+
+
+            <p:dialog  header="#{msg['dialog.tipoprueba']}" widgetVar="overlayPanelTipoPrueba" 
+                       width="50vw" 
+                       responsive="true"
+                       showEffect="fade" 
+                       modal="true" 
+                       closable="true"
+                       resizable="true"
+                       maximizable="true"
+                       minimizable="true"
+                       >
+                <p:ajax event="close" update=":form:growl" listener="#{tipoPruebaFaces.handleCloseDialogRefresh}" />
+                <p:outputPanel id="outputPanelTipoPrueba" style="text-align:center;"  >
+                    <c:if test="${tipoPruebaFaces.showDialogContent == false}">
+
+
+                        <utilidades:sincronizacionrequeridacontroller onclick="PF('overlayPanelTipoPrueba').hide()"
+                                                                      message="#{tipoPruebaFaces.message}"
+                                                                      controller="#{tipoPruebaFaces}"
+                                                                      />
+                    </c:if>
+                    <c:if test="${tipoPruebaFaces.showDialogContent == true}">
+
+                        <div class="grid ui-fluid mt-3 floatlabel-demo">
+                            <div class="col-12 md:col-12">
+
+                                <div class="field">
+                                    <span class="ui-float-label">
+                                        <p:inputTextarea value="#{tipoPruebaFaces.tipoPruebaSelected.tipoPrueba}" rows="3" autoResize="false" />
+                                        <p:outputLabel for="@previous" value="#{msg['label.tipoprueba']}" />
+                                        <p:message for="@previous" />
+                                    </span>
+                                </div>
+
+                                <div class="field">
+                                    <span class="ui-float-label" jsf:rendered="#{tipoPruebaFaces.buttonNewPressed eq false}">
+
+                                        <p:selectBooleanCheckbox value="#{tipoPruebaFaces.tipoPruebaSelected.active}"/> 
+                                        <p:outputLabel for="@previous" value="#{msg['label.active']}" />
+                                        <p:message for="@previous" />
+                                    </span>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                        <div class="flex align-items-center "><!-- comment -->
+
+                            <p:dataTable style="border-style: none" value="#{tipoPruebaFaces.tipoPruebaSelected.observacionTipoPrueba}"
+                                         var="item"
+                                         paginator="true"
+                                         editMode="cell"
+
+                                         id="dataTableObservacion"
+                                         widgetVar="dataTableObservacion"
+                                         editable="true"
+                                         rows="#{tipoPruebaFaces.rowPageDialog.get()}"
+                                         paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                         rowStyleClass="#{item.active eq true ? '' : null}"
+                                         draggableRows="true"
+
+                                         resizableColumns="true" liveResize="true"
+                                         scrollable="true" scrollHeight="390"
+                                         styleClass="table table-hover"
+
+                                         >
+                                <p:ajax event="cellEdit" listener="#{tipoPruebaFaces.onCellEditObservacion}" update=":form:growl, dataTableObservacion"/>
+                                <p:ajax event="rowReorder" listener="#{tipoPruebaFaces.onRowReorderObservacion}" update=":form:growl"/>
+
+
+                                <f:facet name="header">
+                                    <p:menuButton  icon="pi pi-ellipsis-v" buttonStyleClass="ui-button-ui-button-outlined ui-button-plain rounded-button" collision="flipfit"
+                                                   >
+
+                                        <p:menuitem 
+                                            title="#{core['button.add']}" 
+                                            value="#{core['button.add']}" 
+                                            process="@this"
+                                            update=":form:growl,dataTableObservacion"
+                                            icon="pi pi-plus-circle" styleClass="rounded-button mr-2 ui-button-summary"
+
+                                            action="#{tipoPruebaFaces.agregarRowObservacionTipoPrueba()}" />
+
+                                    </p:menuButton>
+
+
+                                </f:facet>
+
+                                <p:column class="columnInputTextArea42" headerText="#{msg['field.observacion']}" >
+
+
+
+
+                                    <p:cellEditor >
+                                        <f:facet name="output">
+                                            <jmoordbcorejsf:outputLabelLarge text="#{item.observacion}" />
+                                        </f:facet>
+                                        <f:facet name="input" >
+                                            <p:inputTextarea  rows="#{item.observacion.length() le 70?1:(item.observacion.length()/70)+1}" style="width: 100% !important;" autoResize="false"  value="#{item.observacion}"  />
+                                        </f:facet>
+                                    </p:cellEditor>
+
+                                </p:column>
+                                <p:column class="column4">
+                                    <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
+                                                     process="@this"
+
+                                                     update=":form:growl, dataTableObservacion"
+                                                     action="#{tipoPruebaFaces.deleteObservacionTipoPrueba(item)}"
+                                                     >
+                                        <p:confirm type="popup" header="#{core['confirmdialog.header']}" message="#{core['confirmdialog.message']}" icon="pi pi-info-circle"/>
+                                    </p:commandButton>
+
+
+
+
+                                </p:column>
+
+                            </p:dataTable>
+
+
+                        </div>
+
+
+
+
+                        <div class="flex align-items-center ">
+                            <div class=" border-top-1 surface-border col-6 flex">
+                                <p:commandButton  title="#{core['button.save']}" icon="pi pi-save"
+                                                  action="#{tipoPruebaFaces.save(tipoPruebaFaces.tipoPruebaSelected)}"
+                                                  update=":form:growl, dataTable"
+                                                  rendered="#{tipoPruebaFaces.buttonNewPressed}"
+                                                  process="outputPanelTipoPrueba"
+                                                  styleClass="w-6 ml-2"/>
+                                <p:commandButton  title="#{core['button.update']}" 
+                                                  icon="pi pi-pencil" 
+                                                  rendered="#{tipoPruebaFaces.buttonNewPressed eq false}"
+                                                  action="#{tipoPruebaFaces.edit(tipoPruebaFaces.tipoPruebaSelected)}"
+                                                  update=":form:growl, dataTable"
+                                                  process="outputPanelTipoPrueba"
+                                                  styleClass="w-6 ml-2"/>
+                            </div>
+
+                            <div class=" border-top-1 surface-border col-6 flex">
+                                <p:commandButton 
+                                    title="#{core['button.cancel']}" 
+                                    icon="pi pi-times" 
+                                    onclick="PF('overlayPanelTipoPrueba').hide()"
+                                    update=":form:growl, dataTable"
+                                    styleClass="ui-button-outlined w-6 mr-2 ui-button-danger"
+                                    />
+
+                            </div>
+                        </div>
+
+                    </c:if>
+
+                </p:outputPanel>
+
+            </p:dialog>
+
+
+
+
+
+
+
+
+
+        </h:form>
+        <h:form id="formaccessdenied" prependId="false"    
+                rendered="!#{p:ifAnyGranted('COORDINADOR-FACULTAD, DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD,SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}">
+
+            <jmoordbcorejsf:accessdenied/>
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>

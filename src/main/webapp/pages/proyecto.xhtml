@@ -1,0 +1,963 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml"
+                xmlns:jmoordbcorejsf="http://xmlns.jcp.org/jsf/composite/jmoordbcorejsf"
+                xmlns:dashboard="http://xmlns.jcp.org/jsf/composite/dashboard"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf"
+                xmlns:proyecto="http://xmlns.jcp.org/jsf/composite/proyecto"
+                xmlns:utilidades="http://xmlns.jcp.org/jsf/composite/utilidades">
+
+    <ui:define name="title">#{conf['application.title']}</ui:define>
+
+    <ui:define name="breadcrumb">
+
+        <p:commandLink action="proyecto" value="#{msg['breadcrumb.proyecto']}">
+        </p:commandLink>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="form" enctype="multipart/form-data" prependId="false"  rendered="#{p:ifAnyGranted('SECRETARIA,COORDINADOR-FACULTAD, DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD,SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}">
+            <p:growl id="growl"/>
+            <script type="text/javascript">
+                function setDataTableWithPageStart() {
+
+                    widgetVardataTable.getPaginator().setPage(0);
+                }
+            </script>
+<!--            <div class="block-category-title">#{msg['form.proyecto']}</div>-->
+
+            <!--<pb:blockViewerCore header="Sidebar" >-->
+            <div class="min-h-screen flex relative lg:static surface-ground">
+                <dashboard:configleftmenu/>
+                <div class="min-h-screen flex flex-column relative flex-auto">
+                    <!--                    <dashboard:top/>-->
+                    <div class="surface-section , jmoordbcore-max-width2000">
+                        <div class="grid">
+
+
+
+
+
+
+
+
+
+
+
+                            <div class="col-12 lg:col-10">
+                                <div class="grid formgrid ui-fluid">
+                                    <div class="field mb-4 col-12">
+                                        <label  class="font-bold">#{msg['label.proyecto']}</label>
+
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+                            <div class="col-12 lg:col-10">
+                                <div class="grid formgrid ui-fluid">
+                                    <div class="field mb-4 col-6">
+                                        <p:outputLabel  value="#{msg['field.proyecto']}" />
+                                        <p:autoComplete id="proyecto" multiple="false" value="#{proyectoFaces.proyectoSelectedAutocomplete}"
+                                                        completeMethod="#{proyectoFaces.completeProyecto}"
+                                                        var="proyecto" itemLabel="#{proyecto.proyecto}" 
+                                                        itemValue="#{proyecto}"
+                                                        forceSelection="true"
+                                                        title="#{msg['autocomplete.minimo3caracteres']}"
+                                                        dropdown="true"
+                                                        minQueryLength="3"
+                                                        scrollHeight="250"
+
+                                                        converter="#{proyectoConverter}"
+                                                        >
+                                            <p:column>
+                                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{proyecto.proyecto} - #{proyecto.cliente.name}"/>
+                                            </p:column>
+                                            <p:ajax event="itemSelect"   listener="#{proyectoFaces.autocompleteSelectedEvent}"  update=":form:growl, proyecto, dataTable" />  
+                                            <p:ajax event="itemUnselect"  process="@this" listener="#{proyectoFaces.autocompleteUnselectListener}" update=":form:growl, proyecto, dataTable" />
+                                        </p:autoComplete>
+                                        <p:message for="@previous" />
+                                    </div>
+                                    
+                                    <div class="field mb-4 col-6">
+                                       <p:outputLabel  value="#{msg['field.cliente']}" />
+                                        <p:autoComplete id="autocompletecliente" multiple="false" value="#{proyectoFaces.clienteSelectedAutocompleteFilter}"
+                                                        completeMethod="#{clienteFaces.completeCliente}"
+                                                        var="cliente" itemLabel="#{cliente.name}  #{cliente.cedularuc}" 
+                                                        itemValue="#{cliente}"
+                                                        forceSelection="true"
+                                                        title="#{msg['autocomplete.minimo3caracteres']}"
+                                                        dropdown="true"
+                                                        minQueryLength="3"
+                                                        scrollHeight="250"
+                                                        converter="#{clienteConverter}"
+                                                        >
+                                            <p:column>
+                                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{cliente.name} - #{cliente.cedularuc}"/>
+                                            </p:column>
+                                            <p:ajax event="itemSelect"   listener="#{proyectoFaces.autocompleteSelectedEventClienteProyectoFilter}"  update=":form:growl, autocompletecliente, dataTable" />  
+                                            <p:ajax event="itemUnselect"  process="@this" listener="#{proyectoFaces.autocompleteUnselectListener}" update=":form:growl, autocompletecliente, dataTable" />
+                                        </p:autoComplete>
+
+
+                                        <p:message for="@previous" />
+
+                                    </div>
+
+
+
+                                </div>
+                            </div>
+
+
+
+
+                            <div class="col-12 lg:col-12">
+                                <p:dataTable style="border-style: none" var="item" value="#{proyectoFaces.proyectoLazyDataModel}"
+                                             binding="#{proyectoFaces.dataTable}"
+                                             id="dataTable"
+                                             widgetVar="widgetVardataTable"
+                                             lazy="true"
+                                             paginator="true"
+                                             rows="#{proyectoFaces.rowPageSmall.get()}"
+                                             paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                             paginatorPosition="both"
+                                             resizableColumns="true"
+                                             liveResize="true"
+
+                                             rowKey="#{item.idproyecto}"
+                                             selection="#{proyectoFaces.proyectoSelected}"
+                                             rowSelectMode="add"
+                                             >
+
+                                    <p:column class="column2">
+                                        <p:rowToggler/>
+                                    </p:column>
+<!--                                    <p:column class="column5" headerText="#{msg['field.idproyecto']}" >
+                                        <p:outputLabel value="#{item.idproyecto}" style="float:left"/>
+
+                                    </p:column>-->
+                                    <p:column class="column5" headerText="#{msg['field.id']}" >
+                                        <p:outputLabel value="#{item.id}" style="float:left"/>
+
+                                    </p:column>
+
+
+                                    <p:column class="column10" headerText="#{msg['field.proyecto']}" >
+                                        <p:outputLabel value="#{item.proyecto}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column10" headerText="#{msg['field.telefono']}" >
+                                        <p:outputLabel value="#{item.telefono}" style="float:left"/>
+
+                                    </p:column>
+
+                                    <p:column class="column15" headerText="#{msg['field.direccion']}" sortable="true" sortBy="#{item.direccion}">
+    <jmoordbcorejsf:outputLabelLarge text="#{item.direccion}"  />
+                                        
+                                    </p:column>
+                                    <p:column class="column10" headerText="#{msg['field.cliente']}" >
+                                        <p:outputLabel value="#{item.cliente.name}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column10" headerText="#{msg['field.estado']}" >
+                                        <p:outputLabel value="#{item.estado}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column10" headerText="#{msg['field.tipocliente']}" >
+                                        <p:outputLabel value="#{item.tipocliente}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column1" headerText="#{msg['field.active']}" >                                     
+                                        <p:selectBooleanCheckbox value="#{item.active}" disabled="true" style="float:left"/> 
+                                    </p:column>
+
+
+                                    <p:column class="column1" exportable="false">
+                                        <p:menuButton  icon="pi pi-ellipsis-v" buttonStyleClass="ui-button-flat ui-button-plain rounded-button" >
+
+                                            <p:menuitem 
+                                                icon="pi pi-pencil" 
+
+                                                value="#{core['button.update']}"
+                                                update=":form:growl, outputPanelCliente"
+                                                oncomplete="PF('overlayPanelCliente').show('#{component.clientId}')"
+                                                action="#{proyectoFaces.prepareProyecto(item)}"
+                                                styleClass="edit-button rounded-button ui-button-success" process="@this"/>       
+
+
+
+
+                                        </p:menuButton>
+                                    </p:column>
+
+                                    <p:rowExpansion>
+                                        <div class="card">
+                                            <h3><p:outputLabel value="#{msg['header.proyecto']}"/></h3>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.id']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.id}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.descripcion']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.descripcion}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.fax']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.fax}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.email']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.email}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+
+
+
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.fechainicial']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{proyectoFaces.showDateWithHour(item.fechaincial)}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.fechafinal']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{proyectoFaces.showDateWithHour(item.fechafinal)}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.active']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:selectBooleanCheckbox value="#{item.active}" style="float:left; font-style: italic" disabled="true"/>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <p:separator/>
+                                        <div class="card">
+                                            <h3><p:outputLabel value="#{msg['header.cliente']}"/></h3>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.idcliente']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.cliente.idcliente}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.nombre']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.cliente.name}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+
+
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.email']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.cliente.email}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.fax']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.cliente.fax}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.observacion']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.cliente.observacion}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.gobierno']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:selectBooleanCheckbox value="#{item.cliente.gobierno}" disabled="true"/>
+
+                                                </div>
+                                            </div>
+
+
+
+
+
+
+
+                                        </div>
+
+
+
+
+
+
+                                        <p:divider rendered="#{proyectoFaces.isJuridico(item.cliente)}"/>
+
+
+                                        <div class="card" jsf:rendered="#{proyectoFaces.isJuridico(item.cliente)}">
+
+                                            <h3><p:outputLabel value="#{msg['header.sede']}"/></h3>
+
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.idsede']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.sede.idsede}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.sede']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.sede.nombre}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.direccion']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    
+                                                        <jmoordbcorejsf:outputLabelLarge text="#{item.sede.direccion}"  />
+                                                   
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.telefono']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.sede.telefono}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.email']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.sede.email}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.active']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:selectBooleanCheckbox value="#{item.sede.active}" style="float:left; font-style: italic" disabled="true"/>
+
+                                                </div>
+                                            </div>
+
+
+
+
+
+
+
+
+                                        </div>
+                                        <p:divider rendered="#{proyectoFaces.isJuridico(item.cliente)}"/>
+                                        <div class="card" jsf:rendered="#{proyectoFaces.isJuridico(item.cliente)}">
+                                            <h3><p:outputLabel value="#{msg['header.representante']}"/></h3>
+
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.nombre']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.representante.nombre}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.cedula']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.representante.cedula}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.dv']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.representante.dv}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.telefono']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.representante.telefono}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.email']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.representante.email}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+
+
+
+
+                                        </div>
+
+                                    </p:rowExpansion>
+
+
+
+                                    <f:facet name="header">
+                                        <div class="grid mt-12">
+                                            <div class="col-2">
+                                                <p:commandButton 
+                                                    title="#{core['button.add']}" 
+                                                    rendered="#{proyectoFaces.isEditable}"
+                                                    update=":form:growl, outputPanelCliente"
+                                                    icon="pi pi-plus-circle" styleClass="rounded-button mr-2 ui-button-summary"
+                                                    oncomplete="PF('overlayPanelCliente').show('#{component.clientId}')"
+                                                    action="#{proyectoFaces.agregarRowProyecto()}" />
+
+                                            </div>
+                                            <div class="col-2">
+                                                <p:commandButton title="#{core['button.print']}"
+                                                                 icon="pi pi-print"
+                                                                 id="buttonPrint"
+                                                                 process="buttonPrint"
+                                                                 ajax="false"
+                                                                 immediate="true"
+                                                                 onclick="this.form.target = '_blank'"
+                                                                 action="#{proyectoFaces.printAll()}"
+                                                                 update=":form:growl"
+                                                                 styleClass="rounded-button ui-button-secondary" 
+                                                                 style="margin-right: .5rem">
+
+                                                </p:commandButton>
+                                            </div>
+                                            <div class="col-2">
+
+
+                                                <p:commandButton  title="#{msg['button.refresh']}" icon="pi pi-refresh" styleClass="rounded-button ui-button-help mr-2"
+                                                                  action="#{proyectoFaces.refresh()}"
+                                                                  process="@this"
+                                                                  update=":form:growl, dataTable,proyecto "/>
+                                            </div>
+                                        </div>
+                                    </f:facet>
+
+                                </p:dataTable>
+
+                            </div>
+                        </div>
+
+
+
+
+
+                    </div> 
+
+                </div>
+            </div>
+
+            <p:confirmPopup global="true">
+                <p:commandButton value="#{core['button.no']}" type="button" styleClass="ui-confirm-popup-no ui-button-flat"/>
+                <p:commandButton value="#{core['button.yes']}" type="button" styleClass="ui-confirm-popup-yes" />
+            </p:confirmPopup>
+
+
+
+
+            <p:dialog header="#{msg['dialog.proyecto']}" widgetVar="overlayPanelCliente" 
+                      width="50vw" 
+                      responsive="true"
+                      showEffect="fade" 
+                      modal="true" 
+                      closable="true"
+                      resizable="true"
+                      maximizable="true"
+                      minimizable="true"
+                      >
+                <p:ajax event="close" update=":form:growl" listener="#{proyectoFaces.handleCloseDialogRefresh}" />
+                <p:outputPanel id="outputPanelCliente" style="text-align:center;"  >
+                    <c:if test="${proyectoFaces.showDialogContent == false}">
+
+
+                        <utilidades:sincronizacionrequeridacontroller onclick="PF('overlayPanelCliente').hide()"
+                                                                      message="#{proyectoFaces.message}"
+                                                                      controller="#{proyectoFaces}"
+                                                                      />
+                    </c:if>
+                    <c:if test="${proyectoFaces.showDialogContent == true}">
+                        <p:tabView id="tabView">
+
+                            <p:tab title="#{msg['tab.general']}">
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-12">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:autoComplete id="autocompletecliente" multiple="false" value="#{proyectoFaces.clienteSelectedAutocomplete}"
+                                                                completeMethod="#{proyectoFaces.completeCliente}"
+                                                                var="cliente" itemLabel="#{cliente.name}  #{cliente.cedularuc}" 
+                                                                itemValue="#{cliente}"
+                                                                forceSelection="true"
+                                                                title="#{msg['autocomplete.minimo3caracteres']}"
+                                                                dropdown="true"
+                                                                minQueryLength="3"
+                                                                scrollHeight="250"
+                                                                converter="#{clienteConverter}"
+                                                                >
+                                                    <p:column>
+                                                        <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{cliente.name} - #{cliente.cedularuc}"/>
+                                                    </p:column>
+                                                    <p:ajax event="itemSelect"   listener="#{proyectoFaces.autocompleteSelectedEventCliente}"  update=":form:growl, autocompletecliente, outputPanelCliente" />  
+                                                    <p:ajax event="itemUnselect"  process="@this" listener="#{proyectoFaces.autocompleteUnselectListener}" update=":form:growl, autocompletecliente, outputPanelCliente" />
+                                                </p:autoComplete>
+
+
+                                                <p:outputLabel for="@previous" value="#{msg['field.cliente']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+
+
+
+
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-10">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText  value="#{proyectoFaces.proyectoSelected.cliente.cedularuc}" disabled="true"/>
+                                                <p:outputLabel for="@previous" value="#{msg['field.cedularuc']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-12 md:col-2">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText  value="#{proyectoFaces.proyectoSelected.cliente.dv}" disabled="true"
+                                                              />
+                                                <p:outputLabel for="@previous" value="#{msg['field.dv']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-8">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+
+                                                <p:inputTextarea value="#{proyectoFaces.proyectoSelected.cliente.direccion}" disabled="true"
+                                                                 rows="2" autoResize="false"
+                                                                 />
+                                                <p:outputLabel for="@previous" value="#{msg['field.direccion']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-12 md:col-4">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText  value="#{proyectoFaces.proyectoSelected.cliente.telefono}"  disabled="true"
+                                                              />
+                                                <p:outputLabel for="@previous" value="#{msg['field.telefono']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:selectOneMenu value="#{proyectoFaces.proyectoSelected.cliente.tipocliente}" filter="true" filterMatchMode="startsWith" disabled="true">
+
+                                        <!--<f:selectItem itemLabel="#{core['selectonemenu.none']}" itemValue=""/>-->
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.natural']}" itemValue="#{msg['selectonemenu.natural']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.panamenoextranjero']}" itemValue="#{msg['selectonemenu.panamenoextranjero']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.extranjeroconcedula']}" itemValue="#{msg['selectonemenu.extranjeroconcedula']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.naturalizado']}" itemValue="#{msg['selectonemenu.naturalizado']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.panamenoantesvigencia']}" itemValue="#{msg['selectonemenu.panamenoantesvigencia']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.poblacionindigena']}" itemValue="#{msg['selectonemenu.poblacionindigena']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.numeropasaporte']}" itemValue="#{msg['selectonemenu.numeropasaporte']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.juridico']}" itemValue="#{msg['selectonemenu.juridico']}"/>
+
+
+
+                                                </p:selectOneMenu>
+
+                                                <p:outputLabel for="@previous" value="#{msg['field.tipocliente']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText  value="#{proyectoFaces.proyectoSelected.cliente.email}"  disabled="true"
+                                                              />
+                                                <p:outputLabel for="@previous" value="#{msg['field.email']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo" jsf:rendered="#{proyectoFaces.isJuridico(proyectoFaces.clienteSelectedAutocomplete)}">
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:selectOneMenu  value="#{proyectoFaces.proyectoSelected.sede}"
+                                                                  var="item" autoWidth="false">
+                                                    <f:selectItems value="#{proyectoFaces.clienteSelectedAutocomplete.sede}"  var="item" 
+                                                                   itemLabel="#{item.nombre}"
+                                                                   itemValue="#{item}" />
+                                                    <p:column> #{item.nombre} 
+                                                    </p:column>
+
+
+                                                </p:selectOneMenu>
+
+                                                <p:outputLabel for="@previous" value="#{msg['field.sede']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:selectOneMenu  value="#{proyectoFaces.proyectoSelected.representante}"
+                                                                  var="item" autoWidth="false">
+                                                    <f:selectItems value="#{proyectoFaces.clienteSelectedAutocomplete.representante}"  var="item" 
+                                                                   itemLabel="#{item.nombre}"
+                                                                   itemValue="#{item}" />
+                                                    <p:column> #{item.nombre} 
+                                                    </p:column>
+
+
+                                                </p:selectOneMenu>
+
+                                                <p:outputLabel for="@previous" value="#{msg['field.representante']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </p:tab>
+                            <p:tab title="#{msg['tab.proyecto']}">
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-12">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputTextarea value="#{proyectoFaces.proyectoSelected.proyecto}"
+                                                                 rows="2" autoResize="false"
+                                                                 />
+                                                <p:outputLabel for="@previous" value="#{msg['field.proyecto']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-12">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+
+                                                <p:inputTextarea value="#{proyectoFaces.proyectoSelected.descripcion}"
+                                                                 rows="2" autoResize="false"
+                                                                 />
+                                                <p:outputLabel for="@previous" value="#{msg['field.descripcion']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-8">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+
+                                                <p:inputTextarea value="#{proyectoFaces.proyectoSelected.direccion}"
+                                                                 rows="2" autoResize="false"
+                                                                 />
+                                                <p:outputLabel for="@previous" value="#{msg['field.direccion']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-12 md:col-4">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText  value="#{proyectoFaces.proyectoSelected.telefono}" 
+                                                              />
+                                                <p:outputLabel for="@previous" value="#{msg['field.telefono']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-8">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText  value="#{proyectoFaces.proyectoSelected.email}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.email']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-12 md:col-4">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText  value="#{proyectoFaces.proyectoSelected.fax}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.fax']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-8">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+
+
+                                                <p:selectOneMenu value="#{proyectoFaces.proyectoSelected.estado}" filter="true" filterMatchMode="startsWith" 
+                                                                 disabled="#{proyectoFaces.buttonNewPressed eq true}"
+                                                                 >
+
+                                        <!--<f:selectItem itemLabel="#{core['selectonemenu.none']}" itemValue=""/>-->
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.iniciado']}" itemValue="#{msg['selectonemenu.iniciado']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.detenido']}" itemValue="#{msg['selectonemenu.detenido']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.cancelado']}" itemValue="#{msg['selectonemenu.cancelado']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.finalizado']}" itemValue="#{msg['selectonemenu.finalizado']}"/>
+
+
+
+                                                </p:selectOneMenu>
+                                                <p:outputLabel for="@previous" value="#{msg['field.estado']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-12 md:col-4">
+                                        <div class="field">
+                                            <span class="ui-float-label" jsf:rendered="#{proyectoFaces.buttonNewPressed eq false}">
+
+                                                <p:selectBooleanCheckbox value="#{proyectoFaces.proyectoSelected.active}"/> 
+                                                <p:outputLabel for="@previous" value="#{msg['field.active']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </p:tab>
+                            <p:tab title="#{msg['tab.calendario']}">
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+
+
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:datePicker  value="#{proyectoFaces.proyectoSelected.fechaincial}" showIcon="true"
+
+                                                               monthNavigator="true" yearNavigator="true"/>
+                                                <p:outputLabel for="@previous" value="#{msg['field.fechainicial']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:datePicker  value="#{proyectoFaces.proyectoSelected.fechafinal}" showIcon="true"
+
+                                                               monthNavigator="true" yearNavigator="true"/>
+                                                <p:outputLabel for="@previous" value="#{msg['field.fechafinal']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </p:tab>
+
+
+                        </p:tabView>
+
+
+
+
+
+
+
+
+
+
+                        <div class="flex align-items-center ">
+                            <div class=" border-top-1 surface-border col-6 flex">
+                                <p:commandButton  title="#{core['button.save']}" icon="pi pi-save"
+                                                  action="#{proyectoFaces.save(proyectoFaces.proyectoSelected)}"
+                                                  update=":form:growl, dataTable"
+                                                  rendered="#{proyectoFaces.buttonNewPressed}"
+                                                  process="outputPanelCliente"
+                                                  styleClass="w-6 ml-2"/>
+
+                                <p:commandButton  title="#{core['button.update']}" 
+                                                  icon="pi pi-pencil" 
+                                                  rendered="#{proyectoFaces.buttonNewPressed eq false}"
+                                                  action="#{proyectoFaces.edit(proyectoFaces.proyectoSelected)}"
+                                                  update=":form:growl, dataTable"
+                                                  process="outputPanelCliente"
+                                                  styleClass="w-6 ml-2"/>
+                            </div>
+
+                            <div class=" border-top-1 surface-border col-6 flex">
+                                <p:commandButton 
+                                    title="#{core['button.cancel']}" 
+                                    icon="pi pi-times" 
+                                    onclick="PF('overlayPanelCliente').hide()"
+                                    update=":form:growl, dataTable"
+                                    styleClass="ui-button-outlined w-6 mr-2 ui-button-danger"
+                                    />
+
+                            </div>
+                        </div>
+
+                    </c:if>
+
+                </p:outputPanel>
+
+            </p:dialog>
+
+
+
+
+
+
+
+
+
+        </h:form>
+        <h:form id="formaccessdenied" prependId="false"    
+                rendered="!#{p:ifAnyGranted('SECRETARIA,COORDINADOR-FACULTAD, DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD,SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}">
+
+            <jmoordbcorejsf:accessdenied/>
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>

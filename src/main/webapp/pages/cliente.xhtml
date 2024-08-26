@@ -1,0 +1,999 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml"
+                xmlns:jmoordbcorejsf="http://xmlns.jcp.org/jsf/composite/jmoordbcorejsf"
+                xmlns:dashboard="http://xmlns.jcp.org/jsf/composite/dashboard"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:utilidades="http://xmlns.jcp.org/jsf/composite/utilidades"
+                xmlns:cliente="jakarta.faces.composite/cliente"
+                xmlns:jsf="jakarta.faces"
+                xmlns:c="jakarta.tags.core">
+
+    <ui:define name="title">#{conf['application.title']}</ui:define>
+
+    <ui:define name="breadcrumb">
+
+        <p:commandLink action="cliente" value="#{msg['breadcrumb.cliente']}">
+        </p:commandLink>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="form" enctype="multipart/form-data" prependId="false"  rendered="#{p:ifAnyGranted('DEVELOPERS,COLABORADOR,SUPER-USER,JEFE-UNIDAD')}">
+
+            <p:growl id="growl"/>
+
+            <p:remoteCommand name="remoteCommandWebSocketCliente"
+                             action="#{clienteFaces.refreshFromWebsocket()}"
+                             update="#{clienteFaces.updateForRemoteWebsocket()}"
+                             oncomplete="#{sprintFaces.onCompleteWebSocket()}"
+                             />
+
+
+            <script type="text/javascript">
+                function setDataTableWithPageStart() {
+
+                    widgetVardataTable.getPaginator().setPage(0);
+                }
+            </script>
+<!--            <div class="block-category-title">#{msg['form.cliente']}</div>-->
+
+            <!--<pb:blockViewerCore header="Sidebar" >-->
+            <div class="min-h-screen flex relative lg:static surface-ground">
+                <dashboard:configleftmenu/>
+                <div class="min-h-screen flex flex-column relative flex-auto">
+                    <!--                    <dashboard:top/>-->
+                    <div class="surface-section , jmoordbcore-max-width2000">
+                        <div class="col-12 lg:col-12">
+                            <div class="grid formgrid ui-fluid">
+                                <div class="field mb-4 col-12">
+                                    <label  class="font-bold">#{msg['title.cliente']}</label>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="grid ui-fluid mt-6 floatlabel-demo">
+
+                            <div class="col-12 md:col-6">
+                                <div class="field">
+                                    <span class="ui-float-label">
+
+                                        <p:autoComplete id="autocompletecliente" multiple="false" value="#{clienteFaces.clienteSelectedAutocomplete}"
+                                                        completeMethod="#{clienteFaces.completeCliente}"
+                                                        var="cliente" itemLabel="#{cliente.name}  #{cliente.cedularuc}" 
+                                                        itemValue="#{cliente}"
+                                                        forceSelection="true"
+                                                        title="#{msg['autocomplete.minimo3caracteres']}"
+                                                        dropdown="true"
+                                                        minQueryLength="3"
+                                                        scrollHeight="250"
+                                                        converter="#{clienteConverter}"
+                                                        >
+                                            <p:column>
+                                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{cliente.name} - #{cliente.cedularuc}"/>
+                                            </p:column>
+                                            <p:ajax event="itemSelect"   listener="#{clienteFaces.autocompleteSelectedEvent}"  update=":form:growl, autocompletecliente, dataTable" />  
+                                            <p:ajax event="itemUnselect"  process="@this" listener="#{clienteFaces.autocompleteUnselectListener}" update=":form:growl, autocompletecliente, dataTable" />
+                                        </p:autoComplete>
+
+                                        <p:outputLabel for="@previous" value="#{msg['field.cliente']}" />
+                                        <p:message for="@previous" />
+
+
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-12 md:col-6">
+                                <div class="field">
+                                    <span class="ui-float-label">
+                                        <p:autoComplete id="autocompletecedularuc" multiple="false" value="#{clienteFaces.clienteSelectedAutocomplete}"
+                                                        completeMethod="#{clienteFaces.completeCedulaRuc}"
+                                                        var="cliente" itemLabel="#{cliente.cedularuc} #{cliente.name}" 
+                                                        itemValue="#{cliente}"
+                                                        forceSelection="true"
+                                                        title="#{msg['autocomplete.minimo3caracteres']}"
+                                                        dropdown="true"
+                                                        minQueryLength="3"
+                                                        scrollHeight="250"
+                                                        converter="#{clienteConverter}"
+                                                        >
+                                            <p:column>
+                                                <h:outputText style="vertical-align: middle; margin-left: .5rem" value="#{cliente.cedularuc} - #{cliente.name}"/>
+                                            </p:column>
+                                            <p:ajax event="itemSelect"   listener="#{clienteFaces.autocompleteSelectedEvent}"  update=":form:growl, autocompletecedularuc, dataTable" />  
+                                            <p:ajax event="itemUnselect"  process="@this" listener="#{clienteFaces.autocompleteUnselectListener}" update=":form:growl, autocompletecedularuc, dataTable" />
+                                        </p:autoComplete>
+                                        <p:outputLabel for="@previous" value="#{msg['field.cedularuc']}" />
+                                        <p:message for="@previous" />
+                                    </span>
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+
+                        <div class="grid">
+
+
+
+
+
+
+
+
+                            <div class="col-12 lg:col-12">
+                                <p:dataTable style="border-style: none" var="item" value="#{clienteFaces.clienteLazyDataModel}"
+                                             binding="#{clienteFaces.dataTable}"
+                                             id="dataTable"
+                                             widgetVar="widgetVardataTable"
+                                             lazy="true"
+                                             paginator="true"
+                                             rows="#{clienteFaces.rowPageSmall.get()}"
+                                             paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                                             paginatorPosition="both"
+                                             resizableColumns="true"
+                                             liveResize="true"
+                                             rowKey="#{item.idcliente}"
+                                             selection="#{clienteFaces.clienteSelected}"
+                                             
+                                             class="table-auto"
+                                             >
+                                    <p:column class="column2">
+                                        <p:rowToggler/>
+                                    </p:column>
+                                    <p:column class="column10" headerText="#{msg['field.cedularuc']}" sortable="true" sortBy="#{item.cedularuc}">
+                                        <p:outputLabel value="#{item.cedularuc}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column10" headerText="#{msg['field.name']}" sortable="true" sortBy="#{item.name}">
+                                        <p:outputLabel value="#{item.name}" style="float:left"
+                                                       title="#{msg['field.sede']} :#{item.sede.size()} #{msg['field.representante']} :#{item.representante.size()}"
+                                                       />
+                                        <p:outputLabel value="" rendered="#{item.sede.size() gt 0}" style="float:left"
+                                                       title="#{msg['label.sedes']} #{item.sede.size()}">
+                                            <i class="pi  pi-building"></i>
+                                        </p:outputLabel>
+                                        <p:outputLabel value="" rendered="#{item.representante.size() gt 0}" style="float:left"
+                                                       title="#{msg['label.representantes']} #{item.representante.size()}">
+                                            <i class="pi pi-users"></i>
+                                        </p:outputLabel>
+
+                                    </p:column>
+                                    <p:column class="column8" headerText="#{msg['field.tipocliente']}" sortable="true" sortBy="#{item.tipocliente}">
+                                        <p:outputLabel value="#{item.tipocliente}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column15" headerText="#{msg['field.direccion']}" sortable="true" sortBy="#{item.direccion}">
+                                        <jmoordbcorejsf:outputLabelLarge text="#{item.direccion}"  />
+
+                                    </p:column>
+                                    <p:column class="column10" headerText="#{msg['field.telefono']}" sortable="true" sortBy="#{item.telefono}">
+                                        <p:outputLabel value="#{item.telefono}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column6" headerText="#{msg['field.celular']}" sortable="true" sortBy="#{item.cedular}">
+                                        <p:outputLabel value="#{item.celular}" style="float:left"/>
+
+                                    </p:column>
+                                    <p:column class="column2" headerText="#{msg['field.dv']}" sortable="true" >
+                                        <p:outputLabel value="#{item.dv}" style="float:left"/>
+
+                                    </p:column>
+
+                                    <p:column class="column2" headerText="#{msg['field.active']}" sortable="true">                                     
+                                        <p:selectBooleanCheckbox value="#{item.active}" disabled="true" style="float:left"/> 
+                                    </p:column>
+
+
+                                    <p:column class="column2" exportable="false">
+                                        <p:menuButton  icon="pi pi-ellipsis-v" buttonStyleClass="ui-button-flat ui-button-plain rounded-button" >
+
+                                            <p:menuitem 
+                                                icon="pi pi-pencil" 
+
+                                                value="#{core['button.update']}"
+                                                update=":form:growl, outputPanelCliente"
+                                                oncomplete="PF('overlayPanelCliente').show('#{component.clientId}')"
+                                                action="#{clienteFaces.prepareCliente(item)}"
+                                                styleClass="edit-button rounded-button ui-button-success" process="@this">
+
+
+                                            </p:menuitem>
+
+
+
+
+                                        </p:menuButton>
+                                    </p:column>
+
+                                    <p:rowExpansion >
+                                        <div class="card">
+
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.idcliente']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.idcliente}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+
+
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.email']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.email}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.fax']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.fax}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.observacion']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{item.observacion}" style="float:left; font-style: italic"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="flex align-items-center flex-wrap text-sm">
+                                                <div class="mr-5 mt-5">
+                                                    <p:outputLabel value="#{msg['field.gobierno']}"/>
+                                                </div>
+                                                <div class="mr-5 mt-5">
+                                                    <p:selectBooleanCheckbox value="#{item.gobierno}" disabled="true"/>
+
+                                                </div>
+                                            </div>
+
+
+
+
+
+
+
+                                        </div>
+
+
+
+
+
+
+                                        <p:divider/>
+
+
+                                        <div class="card" jsf:rendered="#{item.sede.size() gt 0}">
+
+                                            <h4><p:outputLabel value="#{msg['header.sede']} : #{item.sede.size()}"/></h4>
+
+                                            <p:dataTable style="border-style: none" var="sede" value="#{item.sede}"
+                                                         id="dataTableSedeRowExpansion"
+                                                         widgetVar="widgetVardataTableSede"
+                                                         lazy="false"
+                                                         resizableColumns="true" liveResize="true"
+                                                         scrollable="true" scrollHeight="250">
+
+
+                                                <p:column  class="column8" headerText="#{msg['label.sede']}">
+
+                                                    <p:outputLabel value="#{sede.nombre}"/> 
+
+                                                </p:column>
+
+                                                <p:column  class="column12" headerText="#{msg['label.direccion']}">
+
+
+                                                    <jmoordbcorejsf:outputLabelLarge text="#{sede.direccion}"  />
+                                                </p:column>
+
+                                                <p:column  class="column8" headerText="#{msg['label.telefono']}">
+
+                                                    <p:outputLabel value="#{sede.telefono}"/> 
+
+                                                </p:column>
+                                                <p:column  class="column8" headerText="#{msg['label.email']}">
+
+                                                    <p:outputLabel value="#{sede.email}"/> 
+
+                                                </p:column>
+
+                                                <p:column  class="column8" headerText="#{msg['label.active']}">
+
+
+                                                    <p:selectBooleanCheckbox value="#{sede.active}" style="width:100%" disabled="true"/>
+
+                                                </p:column>
+
+
+                                            </p:dataTable>
+
+
+                                        </div>
+                                        <c:if test="${item.representante.size() gt 0}">
+                                            <p:divider />
+                                        </c:if>
+                                        <div class="card" jsf:rendered="#{item.representante.size() gt 0}">
+                                            <h4><p:outputLabel value="#{msg['header.representante']} : #{item.representante.size()}"/></h4>
+
+                                            <p:dataTable style="border-style: none" var="representante" value="#{item.representante}"
+                                                         id="dataTableRepresentanteRowExpansion"
+                                                         widgetVar="widgetVardataTableRepresentante"
+                                                         lazy="false"
+                                                         resizableColumns="true" liveResize="true"
+                                                         scrollable="true" scrollHeight="250">
+
+<!--                                                <p:column  class="column8" headerText="#{msg['label.id']}">
+
+                                                    <p:outputLabel value="#{representante.id}"/> 
+
+                                                </p:column>-->
+                                                <p:column  class="column10" headerText="#{msg['label.nombre']}">
+
+                                                    <p:outputLabel value="#{representante.nombre}" /> 
+
+                                                </p:column>
+
+
+                                                <p:column  class="column8" headerText="#{msg['label.cedula']}">
+
+                                                    <p:outputLabel value="#{representante.cedula}"/> 
+
+                                                </p:column>
+
+                                                <p:column  class="column2" headerText="#{msg['label.dv']}">
+
+                                                    <p:outputLabel value="#{representante.dv}"/> 
+
+                                                </p:column>
+
+                                                <p:column  class="column8" headerText="#{msg['label.telefono']}">
+
+                                                    <p:outputLabel value="#{representante.telefono}"/> 
+
+                                                </p:column>
+
+                                                <p:column  class="column8" headerText="#{msg['label.email']}">
+
+                                                    <p:outputLabel value="#{representante.email}"/> 
+
+                                                </p:column>
+
+
+                                            </p:dataTable>
+                                        </div>
+
+                                    </p:rowExpansion>
+
+
+
+                                    <f:facet name="header">
+                                        <div class="grid mt-12">
+                                            <div class="col-2">
+                                                <p:commandButton 
+                                                    title="#{core['button.add']}" 
+                                                    rendered="#{clienteFaces.isEditable}"
+                                                    update=":form:growl, outputPanelCliente"
+                                                    icon="pi pi-plus-circle" styleClass="rounded-button mr-2 ui-button-summary"
+                                                    oncomplete="PF('overlayPanelCliente').show('#{component.clientId}')"
+                                                    action="#{clienteFaces.agregarRowCliente()}" />
+
+                                            </div>
+                                            <div class="col-2">
+                                                <p:commandButton title="#{core['button.print']}"
+                                                                 icon="pi pi-print"
+                                                                 id="buttonPrint"
+                                                                 process="buttonPrint"
+                                                                 ajax="false"
+                                                                 immediate="true"
+                                                                 onclick="this.form.target = '_blank'"
+                                                                 action="#{clienteFaces.printAll()}"
+                                                                 update=":form:growl"
+                                                                 styleClass="rounded-button ui-button-secondary" 
+                                                                 style="margin-right: .5rem">
+
+                                                </p:commandButton>
+                                            </div>
+                                            <div class="col-2">
+
+
+                                                <p:commandButton  title="#{msg['button.refresh']}" icon="pi pi-refresh" styleClass="rounded-button ui-button-help mr-2"
+                                                                  action="#{clienteFaces.refresh()}"
+                                                                  process="@this"
+                                                                  update=":form:growl, dataTable"
+                                                                  />
+                                            </div>
+                                        </div>
+                                    </f:facet>
+
+                                </p:dataTable>
+
+                            </div>
+                        </div>
+
+
+
+
+
+                    </div> 
+
+                </div>
+            </div>
+
+            <p:confirmPopup global="true">
+                <p:commandButton value="#{core['button.no']}" type="button" styleClass="ui-confirm-popup-no ui-button-flat"/>
+                <p:commandButton value="#{core['button.yes']}" type="button" styleClass="ui-confirm-popup-yes" />
+            </p:confirmPopup>
+
+
+
+
+
+
+
+            <p:dialog header="#{clienteFaces.tituloDialogo}" widgetVar="overlayPanelCliente"
+                      width="50vw" 
+                      responsive="true"
+                      showEffect="fade" 
+                      modal="true" 
+                      closable="true"
+                      resizable="true"
+                      maximizable="true"
+                      minimizable="true"
+                      >
+                <p:ajax event="close" update=":form:growl" listener="#{clienteFaces.handleCloseDialogRefresh}" />
+                <p:outputPanel id="outputPanelCliente"  style="text-align:center;"  >
+                    <c:if test="${clienteFaces.showDialogContent == false}">
+
+                        <utilidades:sincronizacionrequeridacontroller onclick="PF('overlayPanelCliente').hide()"
+                                                                      message="#{clienteFaces.message}"
+                                                                      controller="#{clienteFaces}"
+
+                                                                      />
+
+                    </c:if>
+                    <c:if test="${clienteFaces.showDialogContent == true}">
+
+
+
+                        <p:tabView id="tabView">
+                            <p:tab title="#{msg['tab.general']}">
+
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+
+
+
+
+
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+
+
+                                                <p:selectOneMenu value="#{clienteFaces.clienteSelected.tipocliente}" filter="true" filterMatchMode="startsWith">
+
+                                        <!--<f:selectItem itemLabel="#{core['selectonemenu.none']}" itemValue=""/>-->
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.natural']}" itemValue="#{msg['selectonemenu.natural']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.panamenoextranjero']}" itemValue="#{msg['selectonemenu.panamenoextranjero']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.extranjeroconcedula']}" itemValue="#{msg['selectonemenu.extranjeroconcedula']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.naturalizado']}" itemValue="#{msg['selectonemenu.naturalizado']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.panamenoantesvigencia']}" itemValue="#{msg['selectonemenu.panamenoantesvigencia']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.poblacionindigena']}" itemValue="#{msg['selectonemenu.poblacionindigena']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.numeropasaporte']}" itemValue="#{msg['selectonemenu.numeropasaporte']}"/>
+                                                    <f:selectItem itemLabel="#{msg['selectonemenu.juridico']}" itemValue="#{msg['selectonemenu.juridico']}"/>
+
+                                                    <p:ajax event="itemSelect" 
+                                                            update=":form:growl,tabView,mascaraCedulaRuc"
+
+                                                            listener="#{clienteFaces.onItemSelectedListener}"/>
+
+                                                </p:selectOneMenu>
+
+                                                <p:outputLabel for="@previous" value="#{msg['field.tipocliente']}" />
+                                                <p:message for="@previous" />
+
+
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 md:col-2">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText id="email" value="#{clienteFaces.clienteSelected.dv}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.dv']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+
+
+
+                                                <p:inputMask id="mascaraCedulaRuc" value="#{clienteFaces.clienteSelected.cedularuc}" mask="#{clienteFaces.mascaraCedulaRuc}" validateMask="true"
+                                                             placeholder="#{clienteFaces.clienteSelected.cedularuc}"
+
+                                                             >
+
+                                                </p:inputMask>
+
+
+
+                                                <p:outputLabel for="@previous" id="mascaraCedulaRucLabel" value="#{msg['field.cedularuc']} #{clienteFaces.mascaraCedulaRuc}"  rendered="#{clienteFaces.buttonNewPressed}"/>
+
+
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText  value="#{clienteFaces.clienteSelected.name}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.nameformated']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+
+
+                                    <div class="col-12 md:col-10">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText value="#{clienteFaces.clienteSelected.direccion}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.direccion']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-12 md:col-2">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText value="#{clienteFaces.clienteSelected.telefono}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.telefono']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText value="#{clienteFaces.clienteSelected.celular}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.celular']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText value="#{clienteFaces.clienteSelected.fax}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.fax']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+                                <div class="grid ui-fluid mt-3 floatlabel-demo">
+
+                                    <div class="col-12 md:col-6">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:inputText value="#{clienteFaces.clienteSelected.email}" />
+                                                <p:outputLabel for="@previous" value="#{msg['field.email']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-12 md:col-6">
+
+                                        <div class="field">
+                                            <span class="ui-float-label">
+
+
+                                                <p:inputTextarea value="#{clienteFaces.clienteSelected.observacion}"
+                                                                 rows="2" autoResize="false"
+                                                                 >
+
+                                                </p:inputTextarea>
+                                                <p:outputLabel for="@previous" value="#{msg['field.observacion']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="grid ui-fluid mt-3 floatlabel-demo" >
+
+                                    <div class="col-12 md:col-6">
+
+                                        <div class="field">
+                                            <span class="ui-float-label">
+
+                                                <p:selectBooleanCheckbox value="#{clienteFaces.clienteSelected.gobierno}"/>
+                                                <p:outputLabel for="@previous" value="#{msg['field.gobierno']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-12 md:col-6" jsf:rendered="#{clienteFaces.buttonNewPressed eq false}">
+                                        <div class="field">
+                                            <span class="ui-float-label">
+                                                <p:selectBooleanCheckbox value="#{clienteFaces.clienteSelected.active}"/>
+
+                                                <p:outputLabel for="@previous" value="#{msg['field.active']}" />
+                                                <p:message for="@previous" />
+                                            </span>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+
+
+
+
+
+
+                            </p:tab>
+                            <c:if test="${clienteFaces.clienteSelected.tipocliente eq 'Juridico'}" id="testSede">
+                                <p:tab title="#{msg['tab.sede']}"  >
+
+                                    <p:dataTable
+                                        value="#{clienteFaces.sedes}" var="sede" 
+                                        rowKey="#{sede.idsede}"
+                                        editable="true"
+                                        paginator="false"
+                                        editMode="cell"
+                                        id="dataTableSede"
+                                        widgetVar="dataTableSede"
+                                        scrollable="true" scrollHeight="250"
+                                        resizableColumns="true" liveResize="true"
+
+                                        >
+
+                                        <p:ajax event="cellEdit" listener="#{clienteFaces.onCellEdit}" update=":form:growl"/>
+<!--                                        <p:column  class="column8" headerText="#{msg['label.idsede']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{sede.idsede}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{sede.idsede}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>-->
+
+                                        <p:column  class="column8" headerText="#{msg['label.sede']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{sede.nombre}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{sede.nombre}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column  class="column8" headerText="#{msg['label.direccion']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{sede.direccion}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{sede.direccion}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column  class="column8" headerText="#{msg['label.telefono']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{sede.telefono}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{sede.telefono}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+                                        <p:column  class="column8" headerText="#{msg['label.email']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{sede.email}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{sede.email}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column  class="column8" headerText="#{msg['label.active']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+
+                                                    <p:selectBooleanCheckbox value="#{sede.active}" style="width:100%" disabled="true"/>
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:selectBooleanCheckbox value="#{sede.active}" style="width:100%"/>
+
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+
+
+
+
+
+                                        <p:column class="column2" >
+                                            <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
+                                                             process="@this"
+                                                             update=":form:growl, dataTableSede"
+                                                             action="#{clienteFaces.deleteSede(sede)}"
+                                                             >
+                                                <p:confirm type="popup" header="#{core['confirmdialog.header']}" message="#{core['confirmdialog.message']}" icon="pi pi-info-circle"/>
+                                            </p:commandButton>
+                                        </p:column>
+
+                                        <f:facet name="header">
+                                            <div class="grid mt-12">
+
+
+                                                <div class="col-4">
+
+
+                                                    <p:remoteCommand name="remoteCommandCreate"
+                                                                     update=":form:growl,dataTableSede"/>
+                                                    <p:commandButton 
+                                                        title="#{core['button.add']}" 
+                                                        update=":form:growl, dataTableSede"
+                                                        oncomplete="remoteCommandCreate()"
+                                                        icon="pi pi-plus-circle" 
+                                                        styleClass="rounded-button mr-2 ui-button-summary"
+                                                        action="#{clienteFaces.agregarRowSede('dataTableSede')}"
+                                                        process="@this"/>
+
+                                                </div>
+
+                                            </div>
+                                        </f:facet>
+                                    </p:dataTable>
+
+
+
+                                </p:tab>
+                            </c:if>
+                            <c:if test="${clienteFaces.clienteSelected.tipocliente eq 'Juridico'}">
+                                <p:tab title="#{msg['tab.representante']}">
+
+
+                                    <p:dataTable
+                                        value="#{clienteFaces.representantes}" var="representante" 
+                                        rowKey="#{representante.id}"
+                                        editable="true"
+                                        paginator="false"
+
+                                        id="dataTableRepresentante"
+                                        widgetVar="dataTableRepresentante"
+                                        scrollable="true" scrollHeight="250"
+                                        resizableColumns="true" liveResize="true"
+                                        editMode="cell"
+                                        >
+
+                                        <p:ajax event="cellEdit" listener="#{clienteFaces.onCellEdit}" update=":form:growl"/>
+
+<!--                                <p:column  class="column8" headerText="#{msg['label.id']}">
+
+                                    <p:outputLabel value="#{representante.id}"/> 
+
+                                </p:column>-->
+                                        <p:column  class="column10" headerText="#{msg['label.nombre']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{representante.nombre}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{representante.nombre}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+
+                                        <p:column  class="column8" headerText="#{msg['label.cedula']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{representante.cedula}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{representante.cedula}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column  class="column2" headerText="#{msg['label.dv']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{representante.dv}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{representante.dv}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column  class="column8" headerText="#{msg['label.telefono']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{representante.telefono}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{representante.telefono}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <p:column  class="column8" headerText="#{msg['label.email']}">
+                                            <p:cellEditor>
+                                                <f:facet name="output">
+                                                    <p:outputLabel value="#{representante.email}"/> 
+                                                </f:facet>
+                                                <f:facet name="input">
+                                                    <p:inputText  value="#{representante.email}" style="width:100%"/>
+                                                </f:facet>
+                                            </p:cellEditor>
+                                        </p:column>
+
+                                        <!--  <p:column style="width:6rem">
+                                                                            <p:rowEditor editTitle="Edit Row" cancelTitle="Cancel Edit" saveTitle="Save Row"/>
+                                                                        </p:column>-->
+
+
+                                        <p:column class="column2" >
+                                            <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
+                                                             process="@this"
+                                                             update=":form:growl, dataTableRepresentante"
+                                                             action="#{clienteFaces.deleteRepresentante(representante)}"
+                                                             >
+                                                <p:confirm type="popup" header="#{core['confirmdialog.header']}" message="#{core['confirmdialog.message']}" icon="pi pi-info-circle"/>
+                                            </p:commandButton>
+                                        </p:column>
+
+                                        <f:facet name="header">
+                                            <div class="grid mt-12">
+
+                                                <div class="col-10">
+
+                                                    <p:remoteCommand name="remoteCommandCreateRepresentante"
+                                                                     update=":form:growl,dataTableRepresentante"/>
+                                                    <p:commandButton 
+                                                        title="#{core['button.add']}" 
+                                                        update="outputPanelCliente,:form:growl, dataTableRepresentante"
+                                                        oncomplete="remoteCommandCreateRepresentante()"
+                                                        icon="pi pi-plus-circle" 
+                                                        styleClass="rounded-button mr-2 ui-button-summary"
+                                                        action="#{clienteFaces.agregarRowRepresentante('dataTableRepresentante')}" />
+
+                                                </div>
+
+                                            </div>
+                                        </f:facet>
+                                    </p:dataTable>
+                                </p:tab>
+
+                            </c:if>
+
+
+
+
+                        </p:tabView>
+
+
+                        <div class="flex align-items-center ">
+                            <div class=" border-top-1 surface-border col-4 flex">
+                                <p:commandButton  title="#{core['button.save']}" icon="pi pi-save"
+                                                  action="#{clienteFaces.save(clienteFaces.clienteSelected)}"
+                                                  update=":form:growl, dataTable"
+                                                  process="outputPanelCliente"
+                                                  rendered="#{clienteFaces.buttonNewPressed}"
+                                                  styleClass="w-6 ml-2"/>
+                            </div>
+
+                            <div class=" border-top-1 surface-border col-4 flex">
+                                <p:commandButton  title="#{core['button.update']}" icon="pi pi-save"
+                                                  action="#{clienteFaces.edit(clienteFaces.clienteSelected)}"
+                                                  update=":form:growl, dataTable"
+                                                  process="outputPanelCliente"
+                                                  rendered="#{!clienteFaces.buttonNewPressed}"
+                                                  styleClass="w-6 ml-2"/>
+
+                            </div>
+                            <div class=" border-top-1 surface-border col-4 flex">
+                                <p:commandButton 
+                                    title="#{core['button.cancel']}" 
+                                    icon="pi pi-times" 
+                                    onclick="PF('overlayPanelCliente').hide()"
+                                    update=":form:growl, dataTable"
+                                    styleClass="ui-button-outlined w-6 mr-2 ui-button-danger"
+                                    />
+
+                            </div>
+                        </div>
+
+
+
+
+                    </c:if>
+
+                </p:outputPanel>
+                <!--</p:overlayPanel>-->
+
+                <p:confirmPopup global="true">
+                    <p:commandButton value="#{core['button.no']}" type="button" styleClass="ui-confirm-popup-no ui-button-flat"/>
+                    <p:commandButton value="#{core['button.yes']}" type="button" styleClass="ui-confirm-popup-yes" />
+                </p:confirmPopup>
+
+            </p:dialog>
+
+
+
+
+
+        </h:form>
+        <h:form id="formaccessdenied" prependId="false"    
+                rendered="!#{p:ifAnyGranted('DEVELOPERS,COLABORADOR,SUPER-USER,JEFE-UNIDAD')}">
+
+            <jmoordbcorejsf:accessdenied/>
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>

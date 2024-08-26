@@ -1,0 +1,169 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/template.xhtml"
+                xmlns:jmoordbcorejsf="http://xmlns.jcp.org/jsf/composite/jmoordbcorejsf"
+                xmlns:dashboard="http://xmlns.jcp.org/jsf/composite/dashboard"
+          
+                xmlns:jsf="jakarta.faces"
+     
+                xmlns:f="jakarta.faces.core">
+
+    <ui:define name="title">#{conf['application.title']}</ui:define>
+
+    <ui:define name="breadcrumb">
+
+        <!--<i class="pi pi-angle-right"></i>-->
+        <p:commandLink action="dashboard" value="#{msg['breadcrumb.dashboard']}" >
+
+        </p:commandLink>
+
+    </ui:define>
+
+    <ui:define name="content">
+
+        <h:form id="form" enctype="multipart/form-data" prependId="false"  rendered="#{p:ifAnyGranted('SECRETARIA,COLABORADOR,COORDINADOR-FACULTAD, DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD,SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}">
+            <!--<h:form id="form" enctype="multipart/form-data" prependId="false"  >-->
+            <p:growl id="growl"/>
+            <p:remoteCommand name="remoteCommandWebSocketProyecto" action="#{dashboardFaces.refreshFromWebsocket()}"
+                             update="#{dashboardFaces.updateForRemoteWebsocket()}" 
+                             oncomplete="#{dashboardFaces.onCompleteWebSocket()}" 
+
+                             />
+
+
+            <!--<div class="block-category-title">#{msg['form.dashboard']}</div>-->
+            <!--<div class="jmoordbcore-block-category-title">#{msg['form.dashboard']} 1</div>-->
+
+            <!--<pb:blockViewerCore header="Sidebar" >-->
+            <div class="min-h-screen flex relative lg:static surface-ground">
+                <dashboard:configleftmenu/>
+
+                <div class="min-h-screen flex flex-column relative flex-auto">
+                    <!--<dashboard:top/>-->
+                    <div class="flex flex-column flex-auto">
+
+
+<!--                        <div class="col-12 md:col-4" jsf:rendered="#{dashboardFaces.contadorNotificacionesWebsocket gt 0}">
+                            <p:staticMessage severity="warn" summary="#{core['warning.warning']}" detail="#{msg['warning.haynuevoscambiosactualiceformulario']}" style="width: 100%"/>
+                        </div>-->
+
+
+                        <div class="p-5 flex flex-column flex-auto">
+                            <div class="grid">
+                                <div class="col-12">
+                                    <div class="grid">
+                                        <div class="col-12 md:col-6 lg:col-3 p-3">
+                                            <div class="p-3 text-center bg-blue-500" style="border-radius: 12px">
+                                                <span class="inline-flex justify-content-center align-items-center bg-blue-600 border-circle mb-3" style="width:49px; height: 49px">
+                                                    <i class="pi pi-users text-xl text-white"></i>
+                                                </span>
+
+                                                <div>
+                                                    <p:commandLink class="text-2xl font-medium text-white mb-2"
+                                                                   value="#{dashboardFaces.totalClientes}" 
+                                                                 
+                                                                   update=":form"
+                                                                   action="cliente"
+                                                                   />
+
+
+                                                </div>
+                                                <span class="text-blue-100 font-medium">#{msg['label.clientes']}</span>
+
+
+                                            </div>
+                                        </div>
+                                        <div class="col-12 md:col-6 lg:col-3 p-3">
+                                            <div class="p-3 text-center bg-purple-500" style="border-radius: 12px">
+                                                <span class="inline-flex justify-content-center align-items-center bg-purple-600 border-circle mb-3" style="width:49px; height: 49px">
+                                                    <i class="pi pi-server text-xl text-white"></i>
+                                                </span>
+                                             
+                                                
+                                                <div>
+                                                <p:commandLink class="text-2xl font-medium text-white mb-2"
+                                                                   value="#{dashboardFaces.totalProyectos}" 
+                                                                 
+                                                                   update=":form"
+                                                                   action="proyecto"
+                                                                   />
+
+                                                </div>
+                                                <span class="text-purple-100 font-medium">#{msg['label.proyectos']}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 md:col-6 lg:col-3 p-3">
+                                            <div class="p-3 text-center bg-indigo-500" style="border-radius: 12px">
+                                                <span class="inline-flex justify-content-center align-items-center bg-indigo-600 border-circle mb-3" style="width:49px; height: 49px">
+                                                    <i class="pi pi-compass text-xl text-white"></i>
+                                                </span>
+                                                
+                                                
+                                                <div>
+                                                   5
+
+
+                                                </div>
+                                                
+                                                
+                                                <span class="text-indigo-100 font-medium">#{msg['label.finalizado']}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 md:col-6 lg:col-3 p-3">
+                                            <div class="p-3 text-center bg-orange-500" style="border-radius: 12px">
+                                                <span class="inline-flex justify-content-center align-items-center bg-orange-600 border-circle mb-3" style="width:49px; height: 49px">
+                                                    <i class="pi pi-fw pi-server text-xl text-white"></i>
+                                                </span>
+                                               
+                                                
+                                                 
+                                                <div>
+                                                   6
+
+
+                                                </div>
+                                                
+                                                <span class="text-orange-100 font-medium">#{msg['label.backlog']}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>  
+
+
+
+
+
+
+
+                 
+
+
+                    </div>
+                </div>
+            </div>
+
+      
+     
+
+
+         
+
+
+
+        </h:form>
+        <h:form id="formaccessdenied" prependId="false"    
+                rendered="!#{p:ifAnyGranted('SECRETARIA,COLABORADOR,COORDINADOR-FACULTAD, DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD,SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}">
+
+            <jmoordbcorejsf:accessdenied/>
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>
