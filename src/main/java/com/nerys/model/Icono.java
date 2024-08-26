@@ -12,6 +12,9 @@ import com.jmoordb.core.annotation.enumerations.GenerationType;
 import com.jmoordb.core.annotation.faces.FacesEntity;
 import com.jmoordb.core.annotation.faces.FacesHidden;
 import com.jmoordb.core.annotation.faces.FacesInputText;
+import com.jmoordb.core.annotation.faces.leftmenu.FacesLeftMenuItem;
+import com.jmoordb.core.annotation.faces.enumerations.FacesIcon;
+import com.jmoordb.core.annotation.faces.enumerations.TypeForm;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,7 +23,19 @@ import java.util.Objects;
  * @author avbravo
  */
 @Entity
-@FacesEntity(rolesAllowed = "ADMIN,SUPER-USER")
+@FacesEntity(
+         rolesAllowed = "ADMIN,SUPER-USER",  
+         title = "#{form.icono",
+         typeForm = TypeForm.CRUD)
+/*
+Genera el submenu
+*/
+@FacesLeftMenuItem(action = "icono", 
+        facesIcon = FacesIcon.AMAZON, 
+        value = "", 
+        title = "#{submenu.icono}", 
+        id = "submenuIcono", rolesAllowed = "ADMIN",
+        menuFather = "Registros")
 public class Icono {
 
     @Id(strategy = GenerationType.AUTO)

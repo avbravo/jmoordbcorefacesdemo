@@ -19,7 +19,6 @@ import java.util.Objects;
  * @author avbravo
  */
 @Entity
-@FacesEntity(rolesAllowed = {"ADMIN","SUPER.USER"},saveRolesAllowed ={"ADMIN"})
 public class TipoPrueba {
 
    
