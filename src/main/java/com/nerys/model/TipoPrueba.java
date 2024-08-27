@@ -9,7 +9,12 @@ import com.jmoordb.core.annotation.Embedded;
 import com.jmoordb.core.annotation.Entity;
 import com.jmoordb.core.annotation.Id;
 import com.jmoordb.core.annotation.enumerations.GenerationType;
+import com.jmoordb.core.annotation.faces.FacesBreadcrumb;
 import com.jmoordb.core.annotation.faces.FacesEntity;
+import com.jmoordb.core.annotation.faces.enumerations.FacesIcon;
+import com.jmoordb.core.annotation.faces.enumerations.GenerateController;
+import com.jmoordb.core.annotation.faces.enumerations.TypeForm;
+import com.jmoordb.core.annotation.faces.leftmenu.FacesMenuEntityItem;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,6 +24,22 @@ import java.util.Objects;
  * @author avbravo
  */
 @Entity
+@FacesEntity(
+        rolesAllowed = "ADMIN,SUPER-USER",
+        title = "#{form.tipoprueba",
+        typeForm = TypeForm.CRUD,
+        generateController = GenerateController.YES)
+/*
+Genera el submenu
+ */
+@FacesMenuEntityItem(action = "tipoprueba",
+        facesIcon = FacesIcon.AMAZON,
+        value = "",
+        title = "#{submenu.tipoprueba}",
+        id = "submenuTipoprueba", rolesAllowed = {"ADMIN"},
+        subMenuFather = "subMenuGeneral")
+
+@FacesBreadcrumb(action = {"dashboard", "tipoprueba"}, label = {"#{msg['breadcrumb.dashboard']}", "#{msg['breadcrumb.tipoprueba']}"})
 public class TipoPrueba {
 
    

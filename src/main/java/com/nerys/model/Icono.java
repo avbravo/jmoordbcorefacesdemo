@@ -14,6 +14,7 @@ import com.jmoordb.core.annotation.faces.FacesEntity;
 import com.jmoordb.core.annotation.faces.FacesHidden;
 import com.jmoordb.core.annotation.faces.FacesInputText;
 import com.jmoordb.core.annotation.faces.enumerations.FacesIcon;
+import com.jmoordb.core.annotation.faces.enumerations.GenerateController;
 import com.jmoordb.core.annotation.faces.enumerations.TypeForm;
 import com.jmoordb.core.annotation.faces.leftmenu.FacesMenuEntityItem;
 import java.util.List;
@@ -26,8 +27,9 @@ import java.util.Objects;
 @Entity
 @FacesEntity(
         rolesAllowed = "ADMIN,SUPER-USER",
-        title = "#{form.icono",
-        typeForm = TypeForm.CRUD)
+        title = "#{form.icono}",
+        typeForm = TypeForm.CRUD,
+        generateController = GenerateController.YES)
 /*
 Genera el submenu
  */
