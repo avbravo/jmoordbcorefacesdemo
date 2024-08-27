@@ -42,7 +42,7 @@
                                         icon="pi pi-users mr-2"/>
 
                         </p:submenu>
-                        <p:submenu label="#{msg['menuitem.cuentas']}" rendered="#{p:ifAnyGranted('DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD, COORDINADOR-FACULTAD, SECRETARIA,   SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}">
+                        <p:submenu  label="#{msg['menuitem.cuentas']}" rendered="#{p:ifAnyGranted('DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD, COORDINADOR-FACULTAD, SECRETARIA,   SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}">
 
                             <p:menuitem value="#{msg['menuitem.estado']}" action="reportedepartamental"
                                         rendered="#{p:ifAnyGranted('DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD, COORDINADOR-FACULTAD, SECRETARIA,   SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}"
@@ -224,9 +224,10 @@
 
                     </p:commandButton>
                     <p:menu overlay="true" trigger="leftMenuCommandButtonReportes" my="left top" at="left bottom">
-                        <p:submenu label="#{msg['submenu.proyecto']}">
+                        <p:submenu label="#{msg['submenu.proyecto']}" >
 
-                            <p:menuitem value="#{msg['menuitem.misproyectos']}" action="misproyecto"
+                            <p:menuitem value="#{msg['menuitem.misproyectos']}" 
+                                        action="misproyecto"
                                         rendered="#{p:ifAnyGranted('COLABORADOR,COORDINADOR-FACULTAD, SECRETARIA,DEVELOPERS,SUPER-USER,DIRECTOR,JEFE-UNIDAD,  SUBDIRECTOR-ADMINISTRATIVO, SUBDIRECTOR-INVESTIGACION, SUBDIRECTOR-VIDA-UNIVERSITARIA')}"
                                         icon="pi pi-folder mr-2"/>
 

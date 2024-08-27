@@ -9,12 +9,13 @@ import com.jmoordb.core.annotation.Embedded;
 import com.jmoordb.core.annotation.Entity;
 import com.jmoordb.core.annotation.Id;
 import com.jmoordb.core.annotation.enumerations.GenerationType;
+import com.jmoordb.core.annotation.faces.FacesBreadcrumb;
 import com.jmoordb.core.annotation.faces.FacesEntity;
 import com.jmoordb.core.annotation.faces.FacesHidden;
 import com.jmoordb.core.annotation.faces.FacesInputText;
-import com.jmoordb.core.annotation.faces.leftmenu.FacesLeftMenuItem;
 import com.jmoordb.core.annotation.faces.enumerations.FacesIcon;
 import com.jmoordb.core.annotation.faces.enumerations.TypeForm;
+import com.jmoordb.core.annotation.faces.leftmenu.FacesMenuEntityItem;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,18 +25,21 @@ import java.util.Objects;
  */
 @Entity
 @FacesEntity(
-         rolesAllowed = "ADMIN,SUPER-USER",  
-         title = "#{form.icono",
-         typeForm = TypeForm.CRUD)
+        rolesAllowed = "ADMIN,SUPER-USER",
+        title = "#{form.icono",
+        typeForm = TypeForm.CRUD)
 /*
 Genera el submenu
-*/
-@FacesLeftMenuItem(action = "icono", 
-        facesIcon = FacesIcon.AMAZON, 
-        value = "", 
-        title = "#{submenu.icono}", 
-        id = "submenuIcono", rolesAllowed = "ADMIN",
-        menuFather = "Registros")
+ */
+@FacesMenuEntityItem(action = "icono",
+        facesIcon = FacesIcon.AMAZON,
+        value = "",
+        title = "#{submenu.icono}",
+        id = "submenuIcono", rolesAllowed = {"ADMIN"},
+        subMenuFather = "subMenuGeneral")
+
+@FacesBreadcrumb(action = {"dashboard", "icono"}, label = {"#{msg['breadcrumb.dashboard']}", "#{msg['breadcrumb.icono']}"})
+
 public class Icono {
 
     @Id(strategy = GenerationType.AUTO)
