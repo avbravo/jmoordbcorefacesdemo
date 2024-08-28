@@ -1,0 +1,272 @@
+some content...package com.nerys.model;
+// <editor-fold defaultstate="collapsed" desc="imports">
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import java.io.Serializable;
+/**
+* Java
+*/
+import java.time.LocalDateTime;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.UUID;
+/**
+* Jmoordb
+*/
+import com.jmoordb.core.util.MessagesUtil;
+import com.jmoordb.core.util.JmoordbCoreDateUtil;
+import com.jmoordb.core.annotation.Referenced;
+import com.jmoordb.core.annotation.enumerations.TypePK;
+import com.jmoordb.core.annotation.enumerations.TypeReferenced;
+/**
+* MongoDB
+*/
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import org.bson.conversions.Bson;
+import com.nerys.model.Ensayo;
+import com.nerys.model.*;
+
+
+// </editor-fold>
+@RequestScoped
+public class EnsayoSupplier  implements Serializable{
+// <editor-fold defaultstate="collapsed" desc="inject">
+
+    @Inject
+   TipoPruebaRepository tipoPruebaRepository ;
+    @Inject
+   TipoPruebaSupplier tipoPruebaSupplier ;
+    @Inject
+   ActionHistorySupplier actionHistorySupplier ;
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Ensayo get(Supplier<? extendsEnsayo> s, Document document, Boolean... showError) ">
+
+    public Ensayo get(Supplier<? extends Ensayo> s, Document document_, Boolean... showError) {
+        Ensayo ensayo= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 ensayo.setIdensayo(document_.getString("idensayo"));
+	ensayo.setEnsayo(document_.getString("ensayo"));
+	ensayo.setObservacion(document_.getString("observacion"));
+	ensayo.setActive(document_.getBoolean("active"));
+	// @Referenced of [tipoPrueba how Referenced]
+	TipoPrueba tipoPrueba = tipoPruebaSupplier.getId(TipoPrueba::new,(Document) document_.get("tipoPrueba"));
+	ensayo.setTipoPrueba(tipoPruebaRepository.findByPk(tipoPrueba.getIdtipoprueba()).get());
+		
+
+	// Embedded List<actionHistory>
+	List<ActionHistory> actionHistoryList = new ArrayList<>();
+	List<Document> actionHistoryDoc = (List) document_.get("actionHistory");
+	if( actionHistoryDoc == null || actionHistoryDoc.isEmpty()){
+
+
+	}else{
+		for( Document docActionHistory : actionHistoryDoc){
+			ActionHistory actionHistory = actionHistorySupplier.get(ActionHistory::new, docActionHistory);
+			actionHistoryList.add(actionHistory);
+		}
+	}
+	ensayo.setActionHistory(actionHistoryList);
+		
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return ensayo;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Ensayo getId(Supplier<? extendsEnsayo> s, Document document, Boolean... showError) ">
+
+    public Ensayo getId(Supplier<? extends Ensayo> s, Document document_, Boolean... showError) {
+        Ensayo ensayo= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 ensayo.setIdensayo(document_.getString("idensayo"));
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return ensayo;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Ensayo putObjectId(Ensayo ensayo String _id, Boolean... showError) ">
+
+    public Ensayo putObjectId(Ensayo ensayo, String _id, Boolean... showError) {
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return ensayo;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toDocument (Ensayo ensayo) ">
+
+    public Document toDocument(Ensayo ensayo) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idensayo",ensayo.getIdensayo());
+		document_.put("ensayo",ensayo.getEnsayo());
+		document_.put("observacion",ensayo.getObservacion());
+		document_.put("active",ensayo.getActive());
+ 
+	// Referenced of tipoPrueba
+		document_.put("tipoPrueba",tipoPruebaSupplier.toReferenced(ensayo.getTipoPrueba()));
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(ensayo.getActionHistory()));
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toDocument (List<Ensayo> ensayoList) ">
+
+    public List<Document> toDocument(List<Ensayo> ensayoList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Ensayo ensayo : ensayoList){
+		 Document document_ = new Document();
+		document_.put("idensayo",ensayo.getIdensayo());
+		document_.put("ensayo",ensayo.getEnsayo());
+		document_.put("observacion",ensayo.getObservacion());
+		document_.put("active",ensayo.getActive());
+ 
+	// Referenced of tipoPrueba
+		document_.put("tipoPrueba",tipoPruebaSupplier.toReferenced(ensayo.getTipoPrueba()));
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(ensayo.getActionHistory()));
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Bson toUpdate (Ensayo ensayo) ">
+
+    public Bson toUpdate(Ensayo ensayo) {
+        Bson update_ = Filters.empty();
+        try {
+        update_ = Updates.combine(
+	 
+		Updates.set("idensayo",ensayo.getIdensayo()),
+		Updates.set("ensayo",ensayo.getEnsayo()),
+		Updates.set("observacion",ensayo.getObservacion()),
+		Updates.set("active",ensayo.getActive()),
+ 
+	// Referenced of tipoPrueba
+		Updates.set("tipoPrueba",tipoPruebaSupplier.toReferenced(ensayo.getTipoPrueba())),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(ensayo.getActionHistory()))
+	
+
+        );
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return update_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Bson> toUpdate (List<Ensayo> ensayoList) ">
+
+    public List<Bson> toUpdate(List<Ensayo> ensayoList) {
+        List<Bson> bsonList_ = new ArrayList<>();
+        try {
+	 for(Ensayo ensayo : ensayoList){
+		 Bson update_ = Filters.empty();
+			update_ = Updates.combine(
+	 
+		Updates.set("idensayo",ensayo.getIdensayo()),
+		Updates.set("ensayo",ensayo.getEnsayo()),
+		Updates.set("observacion",ensayo.getObservacion()),
+		Updates.set("active",ensayo.getActive()),
+ 
+	// Referenced of tipoPrueba
+		Updates.set("tipoPrueba",tipoPruebaSupplier.toReferenced(ensayo.getTipoPrueba())),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(ensayo.getActionHistory()))
+	
+
+        );
+		bsonList_.add(update_);
+ 
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return bsonList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toReferenced (Ensayo ensayo) ">
+
+    public Document toReferenced(Ensayo ensayo) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idensayo",ensayo.getIdensayo());
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toReferenced(List<Ensayo> ensayoList) ">
+
+    public List<Document> toReferenced(List<Ensayo> ensayoList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Ensayo ensayo : ensayoList){
+		 Document document_ = new Document();
+		document_.put("idensayo",ensayo.getIdensayo());
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+
+}

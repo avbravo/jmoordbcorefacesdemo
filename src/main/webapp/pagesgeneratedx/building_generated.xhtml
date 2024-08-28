@@ -1,0 +1,272 @@
+some content...package com.nerys.model;
+// <editor-fold defaultstate="collapsed" desc="imports">
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import java.io.Serializable;
+/**
+* Java
+*/
+import java.time.LocalDateTime;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.UUID;
+/**
+* Jmoordb
+*/
+import com.jmoordb.core.util.MessagesUtil;
+import com.jmoordb.core.util.JmoordbCoreDateUtil;
+import com.jmoordb.core.annotation.Referenced;
+import com.jmoordb.core.annotation.enumerations.TypePK;
+import com.jmoordb.core.annotation.enumerations.TypeReferenced;
+/**
+* MongoDB
+*/
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import org.bson.conversions.Bson;
+import com.nerys.model.Building;
+import com.nerys.model.*;
+
+
+// </editor-fold>
+@RequestScoped
+public class BuildingSupplier  implements Serializable{
+// <editor-fold defaultstate="collapsed" desc="inject">
+
+    @Inject
+   CentralRepository centralRepository ;
+    @Inject
+   CentralSupplier centralSupplier ;
+    @Inject
+   ActionHistorySupplier actionHistorySupplier ;
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Building get(Supplier<? extendsBuilding> s, Document document, Boolean... showError) ">
+
+    public Building get(Supplier<? extends Building> s, Document document_, Boolean... showError) {
+        Building building= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 building.setIdbuilding(document_.getLong("idbuilding"));
+	// @Referenced of [central how Referenced]
+	Central central = centralSupplier.getId(Central::new,(Document) document_.get("central"));
+	building.setCentral(centralRepository.findByPk(central.getIdcentral()).get());
+		
+	building.setActive(document_.getBoolean("active"));
+	building.setBuilding(document_.getString("building"));
+	building.setShortname(document_.getString("shortname"));
+
+	// Embedded List<actionHistory>
+	List<ActionHistory> actionHistoryList = new ArrayList<>();
+	List<Document> actionHistoryDoc = (List) document_.get("actionHistory");
+	if( actionHistoryDoc == null || actionHistoryDoc.isEmpty()){
+
+
+	}else{
+		for( Document docActionHistory : actionHistoryDoc){
+			ActionHistory actionHistory = actionHistorySupplier.get(ActionHistory::new, docActionHistory);
+			actionHistoryList.add(actionHistory);
+		}
+	}
+	building.setActionHistory(actionHistoryList);
+		
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return building;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Building getId(Supplier<? extendsBuilding> s, Document document, Boolean... showError) ">
+
+    public Building getId(Supplier<? extends Building> s, Document document_, Boolean... showError) {
+        Building building= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 building.setIdbuilding(document_.getLong("idbuilding"));
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return building;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Building putObjectId(Building building String _id, Boolean... showError) ">
+
+    public Building putObjectId(Building building, String _id, Boolean... showError) {
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return building;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toDocument (Building building) ">
+
+    public Document toDocument(Building building) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idbuilding",building.getIdbuilding());
+ 
+	// Referenced of central
+		document_.put("central",centralSupplier.toReferenced(building.getCentral()));
+		document_.put("active",building.getActive());
+		document_.put("building",building.getBuilding());
+		document_.put("shortname",building.getShortname());
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(building.getActionHistory()));
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toDocument (List<Building> buildingList) ">
+
+    public List<Document> toDocument(List<Building> buildingList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Building building : buildingList){
+		 Document document_ = new Document();
+		document_.put("idbuilding",building.getIdbuilding());
+ 
+	// Referenced of central
+		document_.put("central",centralSupplier.toReferenced(building.getCentral()));
+		document_.put("active",building.getActive());
+		document_.put("building",building.getBuilding());
+		document_.put("shortname",building.getShortname());
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(building.getActionHistory()));
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Bson toUpdate (Building building) ">
+
+    public Bson toUpdate(Building building) {
+        Bson update_ = Filters.empty();
+        try {
+        update_ = Updates.combine(
+	 
+		Updates.set("idbuilding",building.getIdbuilding()),
+ 
+	// Referenced of central
+		Updates.set("central",centralSupplier.toReferenced(building.getCentral())),
+		Updates.set("active",building.getActive()),
+		Updates.set("building",building.getBuilding()),
+		Updates.set("shortname",building.getShortname()),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(building.getActionHistory()))
+	
+
+        );
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return update_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Bson> toUpdate (List<Building> buildingList) ">
+
+    public List<Bson> toUpdate(List<Building> buildingList) {
+        List<Bson> bsonList_ = new ArrayList<>();
+        try {
+	 for(Building building : buildingList){
+		 Bson update_ = Filters.empty();
+			update_ = Updates.combine(
+	 
+		Updates.set("idbuilding",building.getIdbuilding()),
+ 
+	// Referenced of central
+		Updates.set("central",centralSupplier.toReferenced(building.getCentral())),
+		Updates.set("active",building.getActive()),
+		Updates.set("building",building.getBuilding()),
+		Updates.set("shortname",building.getShortname()),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(building.getActionHistory()))
+	
+
+        );
+		bsonList_.add(update_);
+ 
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return bsonList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toReferenced (Building building) ">
+
+    public Document toReferenced(Building building) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idbuilding",building.getIdbuilding());
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toReferenced(List<Building> buildingList) ">
+
+    public List<Document> toReferenced(List<Building> buildingList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Building building : buildingList){
+		 Document document_ = new Document();
+		document_.put("idbuilding",building.getIdbuilding());
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+
+}

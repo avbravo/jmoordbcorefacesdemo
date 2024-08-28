@@ -1,0 +1,282 @@
+some content...package com.nerys.model;
+// <editor-fold defaultstate="collapsed" desc="imports">
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import java.io.Serializable;
+/**
+* Java
+*/
+import java.time.LocalDateTime;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.UUID;
+/**
+* Jmoordb
+*/
+import com.jmoordb.core.util.MessagesUtil;
+import com.jmoordb.core.util.JmoordbCoreDateUtil;
+import com.jmoordb.core.annotation.Referenced;
+import com.jmoordb.core.annotation.enumerations.TypePK;
+import com.jmoordb.core.annotation.enumerations.TypeReferenced;
+/**
+* MongoDB
+*/
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import org.bson.conversions.Bson;
+import com.nerys.model.Objetivo;
+import com.nerys.model.*;
+
+
+// </editor-fold>
+@RequestScoped
+public class ObjetivoSupplier  implements Serializable{
+// <editor-fold defaultstate="collapsed" desc="inject">
+
+    @Inject
+   AreaRepository areaRepository ;
+    @Inject
+   AreaSupplier areaSupplier ;
+    @Inject
+   ActionHistorySupplier actionHistorySupplier ;
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Objetivo get(Supplier<? extendsObjetivo> s, Document document, Boolean... showError) ">
+
+    public Objetivo get(Supplier<? extends Objetivo> s, Document document_, Boolean... showError) {
+        Objetivo objetivo= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 objetivo.setIdobjetivo(document_.getLong("idobjetivo"));
+	objetivo.setCodigo(document_.getString("codigo"));
+	objetivo.setObjetivo(document_.getString("objetivo"));
+	objetivo.setActive(document_.getBoolean("active"));
+	objetivo.setAnio(document_.getInteger("anio"));
+	objetivo.setProductoesperado(document_.getString("productoesperado"));
+	// @Referenced of [area how Referenced]
+	Area area = areaSupplier.getId(Area::new,(Document) document_.get("area"));
+	objetivo.setArea(areaRepository.findByPk(area.getIdarea()).get());
+		
+
+	// Embedded List<actionHistory>
+	List<ActionHistory> actionHistoryList = new ArrayList<>();
+	List<Document> actionHistoryDoc = (List) document_.get("actionHistory");
+	if( actionHistoryDoc == null || actionHistoryDoc.isEmpty()){
+
+
+	}else{
+		for( Document docActionHistory : actionHistoryDoc){
+			ActionHistory actionHistory = actionHistorySupplier.get(ActionHistory::new, docActionHistory);
+			actionHistoryList.add(actionHistory);
+		}
+	}
+	objetivo.setActionHistory(actionHistoryList);
+		
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return objetivo;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Objetivo getId(Supplier<? extendsObjetivo> s, Document document, Boolean... showError) ">
+
+    public Objetivo getId(Supplier<? extends Objetivo> s, Document document_, Boolean... showError) {
+        Objetivo objetivo= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 objetivo.setIdobjetivo(document_.getLong("idobjetivo"));
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return objetivo;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Objetivo putObjectId(Objetivo objetivo String _id, Boolean... showError) ">
+
+    public Objetivo putObjectId(Objetivo objetivo, String _id, Boolean... showError) {
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return objetivo;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toDocument (Objetivo objetivo) ">
+
+    public Document toDocument(Objetivo objetivo) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idobjetivo",objetivo.getIdobjetivo());
+		document_.put("codigo",objetivo.getCodigo());
+		document_.put("objetivo",objetivo.getObjetivo());
+		document_.put("active",objetivo.getActive());
+		document_.put("anio",objetivo.getAnio());
+		document_.put("productoesperado",objetivo.getProductoesperado());
+ 
+	// Referenced of area
+		document_.put("area",areaSupplier.toReferenced(objetivo.getArea()));
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(objetivo.getActionHistory()));
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toDocument (List<Objetivo> objetivoList) ">
+
+    public List<Document> toDocument(List<Objetivo> objetivoList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Objetivo objetivo : objetivoList){
+		 Document document_ = new Document();
+		document_.put("idobjetivo",objetivo.getIdobjetivo());
+		document_.put("codigo",objetivo.getCodigo());
+		document_.put("objetivo",objetivo.getObjetivo());
+		document_.put("active",objetivo.getActive());
+		document_.put("anio",objetivo.getAnio());
+		document_.put("productoesperado",objetivo.getProductoesperado());
+ 
+	// Referenced of area
+		document_.put("area",areaSupplier.toReferenced(objetivo.getArea()));
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(objetivo.getActionHistory()));
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Bson toUpdate (Objetivo objetivo) ">
+
+    public Bson toUpdate(Objetivo objetivo) {
+        Bson update_ = Filters.empty();
+        try {
+        update_ = Updates.combine(
+	 
+		Updates.set("idobjetivo",objetivo.getIdobjetivo()),
+		Updates.set("codigo",objetivo.getCodigo()),
+		Updates.set("objetivo",objetivo.getObjetivo()),
+		Updates.set("active",objetivo.getActive()),
+		Updates.set("anio",objetivo.getAnio()),
+		Updates.set("productoesperado",objetivo.getProductoesperado()),
+ 
+	// Referenced of area
+		Updates.set("area",areaSupplier.toReferenced(objetivo.getArea())),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(objetivo.getActionHistory()))
+	
+
+        );
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return update_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Bson> toUpdate (List<Objetivo> objetivoList) ">
+
+    public List<Bson> toUpdate(List<Objetivo> objetivoList) {
+        List<Bson> bsonList_ = new ArrayList<>();
+        try {
+	 for(Objetivo objetivo : objetivoList){
+		 Bson update_ = Filters.empty();
+			update_ = Updates.combine(
+	 
+		Updates.set("idobjetivo",objetivo.getIdobjetivo()),
+		Updates.set("codigo",objetivo.getCodigo()),
+		Updates.set("objetivo",objetivo.getObjetivo()),
+		Updates.set("active",objetivo.getActive()),
+		Updates.set("anio",objetivo.getAnio()),
+		Updates.set("productoesperado",objetivo.getProductoesperado()),
+ 
+	// Referenced of area
+		Updates.set("area",areaSupplier.toReferenced(objetivo.getArea())),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(objetivo.getActionHistory()))
+	
+
+        );
+		bsonList_.add(update_);
+ 
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return bsonList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toReferenced (Objetivo objetivo) ">
+
+    public Document toReferenced(Objetivo objetivo) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idobjetivo",objetivo.getIdobjetivo());
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toReferenced(List<Objetivo> objetivoList) ">
+
+    public List<Document> toReferenced(List<Objetivo> objetivoList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Objetivo objetivo : objetivoList){
+		 Document document_ = new Document();
+		document_.put("idobjetivo",objetivo.getIdobjetivo());
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+
+}

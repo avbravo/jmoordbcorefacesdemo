@@ -1,0 +1,292 @@
+some content...package com.nerys.model;
+// <editor-fold defaultstate="collapsed" desc="imports">
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import java.io.Serializable;
+/**
+* Java
+*/
+import java.time.LocalDateTime;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.UUID;
+/**
+* Jmoordb
+*/
+import com.jmoordb.core.util.MessagesUtil;
+import com.jmoordb.core.util.JmoordbCoreDateUtil;
+import com.jmoordb.core.annotation.Referenced;
+import com.jmoordb.core.annotation.enumerations.TypePK;
+import com.jmoordb.core.annotation.enumerations.TypeReferenced;
+/**
+* MongoDB
+*/
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import org.bson.conversions.Bson;
+import com.nerys.model.Zone;
+import com.nerys.model.*;
+
+
+// </editor-fold>
+@RequestScoped
+public class ZoneSupplier  implements Serializable{
+// <editor-fold defaultstate="collapsed" desc="inject">
+
+    @Inject
+   BuildingRepository buildingRepository ;
+    @Inject
+   BuildingSupplier buildingSupplier ;
+    @Inject
+   IconoRepository iconoRepository ;
+    @Inject
+   IconoSupplier iconoSupplier ;
+    @Inject
+   ActionHistorySupplier actionHistorySupplier ;
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Zone get(Supplier<? extendsZone> s, Document document, Boolean... showError) ">
+
+    public Zone get(Supplier<? extends Zone> s, Document document_, Boolean... showError) {
+        Zone zone= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 zone.setIdzone(document_.getLong("idzone"));
+	zone.setActive(document_.getBoolean("active"));
+	// @Referenced of [building how Referenced]
+	Building building = buildingSupplier.getId(Building::new,(Document) document_.get("building"));
+	zone.setBuilding(buildingRepository.findByPk(building.getIdbuilding()).get());
+		
+	zone.setDescripcion(document_.getString("descripcion"));
+	// @Referenced of [icono how Referenced]
+	Icono icono = iconoSupplier.getId(Icono::new,(Document) document_.get("icono"));
+	zone.setIcono(iconoRepository.findByPk(icono.getIdicono()).get());
+		
+	zone.setZone(document_.getString("zone"));
+
+	// Embedded List<actionHistory>
+	List<ActionHistory> actionHistoryList = new ArrayList<>();
+	List<Document> actionHistoryDoc = (List) document_.get("actionHistory");
+	if( actionHistoryDoc == null || actionHistoryDoc.isEmpty()){
+
+
+	}else{
+		for( Document docActionHistory : actionHistoryDoc){
+			ActionHistory actionHistory = actionHistorySupplier.get(ActionHistory::new, docActionHistory);
+			actionHistoryList.add(actionHistory);
+		}
+	}
+	zone.setActionHistory(actionHistoryList);
+		
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return zone;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Zone getId(Supplier<? extendsZone> s, Document document, Boolean... showError) ">
+
+    public Zone getId(Supplier<? extends Zone> s, Document document_, Boolean... showError) {
+        Zone zone= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 zone.setIdzone(document_.getLong("idzone"));
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return zone;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Zone putObjectId(Zone zone String _id, Boolean... showError) ">
+
+    public Zone putObjectId(Zone zone, String _id, Boolean... showError) {
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return zone;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toDocument (Zone zone) ">
+
+    public Document toDocument(Zone zone) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idzone",zone.getIdzone());
+		document_.put("active",zone.getActive());
+ 
+	// Referenced of building
+		document_.put("building",buildingSupplier.toReferenced(zone.getBuilding()));
+		document_.put("descripcion",zone.getDescripcion());
+ 
+	// Referenced of icono
+		document_.put("icono",iconoSupplier.toReferenced(zone.getIcono()));
+		document_.put("zone",zone.getZone());
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(zone.getActionHistory()));
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toDocument (List<Zone> zoneList) ">
+
+    public List<Document> toDocument(List<Zone> zoneList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Zone zone : zoneList){
+		 Document document_ = new Document();
+		document_.put("idzone",zone.getIdzone());
+		document_.put("active",zone.getActive());
+ 
+	// Referenced of building
+		document_.put("building",buildingSupplier.toReferenced(zone.getBuilding()));
+		document_.put("descripcion",zone.getDescripcion());
+ 
+	// Referenced of icono
+		document_.put("icono",iconoSupplier.toReferenced(zone.getIcono()));
+		document_.put("zone",zone.getZone());
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(zone.getActionHistory()));
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Bson toUpdate (Zone zone) ">
+
+    public Bson toUpdate(Zone zone) {
+        Bson update_ = Filters.empty();
+        try {
+        update_ = Updates.combine(
+	 
+		Updates.set("idzone",zone.getIdzone()),
+		Updates.set("active",zone.getActive()),
+ 
+	// Referenced of building
+		Updates.set("building",buildingSupplier.toReferenced(zone.getBuilding())),
+		Updates.set("descripcion",zone.getDescripcion()),
+ 
+	// Referenced of icono
+		Updates.set("icono",iconoSupplier.toReferenced(zone.getIcono())),
+		Updates.set("zone",zone.getZone()),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(zone.getActionHistory()))
+	
+
+        );
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return update_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Bson> toUpdate (List<Zone> zoneList) ">
+
+    public List<Bson> toUpdate(List<Zone> zoneList) {
+        List<Bson> bsonList_ = new ArrayList<>();
+        try {
+	 for(Zone zone : zoneList){
+		 Bson update_ = Filters.empty();
+			update_ = Updates.combine(
+	 
+		Updates.set("idzone",zone.getIdzone()),
+		Updates.set("active",zone.getActive()),
+ 
+	// Referenced of building
+		Updates.set("building",buildingSupplier.toReferenced(zone.getBuilding())),
+		Updates.set("descripcion",zone.getDescripcion()),
+ 
+	// Referenced of icono
+		Updates.set("icono",iconoSupplier.toReferenced(zone.getIcono())),
+		Updates.set("zone",zone.getZone()),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(zone.getActionHistory()))
+	
+
+        );
+		bsonList_.add(update_);
+ 
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return bsonList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toReferenced (Zone zone) ">
+
+    public Document toReferenced(Zone zone) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idzone",zone.getIdzone());
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toReferenced(List<Zone> zoneList) ">
+
+    public List<Document> toReferenced(List<Zone> zoneList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Zone zone : zoneList){
+		 Document document_ = new Document();
+		document_.put("idzone",zone.getIdzone());
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+
+}

@@ -1,0 +1,373 @@
+some content...package com.nerys.model;
+// <editor-fold defaultstate="collapsed" desc="imports">
+
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
+import java.io.Serializable;
+/**
+* Java
+*/
+import java.time.LocalDateTime;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.UUID;
+/**
+* Jmoordb
+*/
+import com.jmoordb.core.util.MessagesUtil;
+import com.jmoordb.core.util.JmoordbCoreDateUtil;
+import com.jmoordb.core.annotation.Referenced;
+import com.jmoordb.core.annotation.enumerations.TypePK;
+import com.jmoordb.core.annotation.enumerations.TypeReferenced;
+/**
+* MongoDB
+*/
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import org.bson.conversions.Bson;
+import com.nerys.model.Proyecto;
+import com.nerys.model.*;
+
+
+// </editor-fold>
+@RequestScoped
+public class ProyectoSupplier  implements Serializable{
+// <editor-fold defaultstate="collapsed" desc="inject">
+
+    @Inject
+   DepartamentViewRepository departamentViewRepository ;
+    @Inject
+   DepartamentViewSupplier departamentViewSupplier ;
+    @Inject
+   ClienteRepository clienteRepository ;
+    @Inject
+   ClienteSupplier clienteSupplier ;
+    @Inject
+   SedeSupplier sedeSupplier ;
+    @Inject
+   RepresentanteSupplier representanteSupplier ;
+    @Inject
+   ActionHistorySupplier actionHistorySupplier ;
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Proyecto get(Supplier<? extendsProyecto> s, Document document, Boolean... showError) ">
+
+    public Proyecto get(Supplier<? extends Proyecto> s, Document document_, Boolean... showError) {
+        Proyecto proyecto= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 proyecto.setIdproyecto(document_.getLong("idproyecto"));
+	proyecto.setId(document_.getLong("id"));
+	// @Referenced of [departamentView how Referenced]
+	DepartamentView departamentView = departamentViewSupplier.getId(DepartamentView::new,(Document) document_.get("departament"));
+	proyecto.setDepartamentView(departamentViewRepository.findByPk(departamentView.getIddepartament()).get());
+		
+	proyecto.setProyecto(document_.getString("proyecto"));
+	proyecto.setDescripcion(document_.getString("descripcion"));
+	proyecto.setDireccion(document_.getString("direccion"));
+	proyecto.setTelefono(document_.getString("telefono"));
+	proyecto.setFax(document_.getString("fax"));
+	proyecto.setEmail(document_.getString("email"));
+	proyecto.setActive(document_.getBoolean("active"));
+	proyecto.setEstado(document_.getString("estado"));
+	proyecto.setTipocliente(document_.getString("tipocliente"));
+	// @Referenced of [cliente how Referenced]
+	Cliente cliente = clienteSupplier.getId(Cliente::new,(Document) document_.get("cliente"));
+	proyecto.setCliente(clienteRepository.findByPk(cliente.getIdcliente()).get());
+		
+
+	// Embedded of [sede]
+	proyecto.setSede(sedeSupplier.get(Sede::new,(Document) document_.get("sede")));
+		
+
+	// Embedded of [representante]
+	proyecto.setRepresentante(representanteSupplier.get(Representante::new,(Document) document_.get("representante")));
+		
+	proyecto.setFechaincial(document_.getDate("fechaincial"));
+	proyecto.setFechafinal(document_.getDate("fechafinal"));
+
+	// Embedded List<actionHistory>
+	List<ActionHistory> actionHistoryList = new ArrayList<>();
+	List<Document> actionHistoryDoc = (List) document_.get("actionHistory");
+	if( actionHistoryDoc == null || actionHistoryDoc.isEmpty()){
+
+
+	}else{
+		for( Document docActionHistory : actionHistoryDoc){
+			ActionHistory actionHistory = actionHistorySupplier.get(ActionHistory::new, docActionHistory);
+			actionHistoryList.add(actionHistory);
+		}
+	}
+	proyecto.setActionHistory(actionHistoryList);
+		
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return proyecto;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Proyecto getId(Supplier<? extendsProyecto> s, Document document, Boolean... showError) ">
+
+    public Proyecto getId(Supplier<? extends Proyecto> s, Document document_, Boolean... showError) {
+        Proyecto proyecto= s.get(); 
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+	 proyecto.setIdproyecto(document_.getLong("idproyecto"));
+
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return proyecto;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Proyecto putObjectId(Proyecto proyecto String _id, Boolean... showError) ">
+
+    public Proyecto putObjectId(Proyecto proyecto, String _id, Boolean... showError) {
+            Boolean show = true;
+        try {
+            if (showError.length != 0) {
+                show = showError[0];
+            }
+	
+         } catch (Exception e) {
+             if (show) {
+                MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+             }
+         }
+         return proyecto;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toDocument (Proyecto proyecto) ">
+
+    public Document toDocument(Proyecto proyecto) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idproyecto",proyecto.getIdproyecto());
+		document_.put("id",proyecto.getId());
+ 
+	// Referenced of departamentView
+		document_.put("departament",departamentViewSupplier.toReferenced(proyecto.getDepartamentView()));
+		document_.put("proyecto",proyecto.getProyecto());
+		document_.put("descripcion",proyecto.getDescripcion());
+		document_.put("direccion",proyecto.getDireccion());
+		document_.put("telefono",proyecto.getTelefono());
+		document_.put("fax",proyecto.getFax());
+		document_.put("email",proyecto.getEmail());
+		document_.put("active",proyecto.getActive());
+		document_.put("estado",proyecto.getEstado());
+		document_.put("tipocliente",proyecto.getTipocliente());
+ 
+	// Referenced of cliente
+		document_.put("cliente",clienteSupplier.toReferenced(proyecto.getCliente()));
+
+	// Embedded of sede
+		document_.put("sede",sedeSupplier.toDocument(proyecto.getSede()));
+
+	// Embedded of representante
+		document_.put("representante",representanteSupplier.toDocument(proyecto.getRepresentante()));
+		document_.put("fechaincial",proyecto.getFechaincial());
+		document_.put("fechafinal",proyecto.getFechafinal());
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(proyecto.getActionHistory()));
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toDocument (List<Proyecto> proyectoList) ">
+
+    public List<Document> toDocument(List<Proyecto> proyectoList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Proyecto proyecto : proyectoList){
+		 Document document_ = new Document();
+		document_.put("idproyecto",proyecto.getIdproyecto());
+		document_.put("id",proyecto.getId());
+ 
+	// Referenced of departamentView
+		document_.put("departament",departamentViewSupplier.toReferenced(proyecto.getDepartamentView()));
+		document_.put("proyecto",proyecto.getProyecto());
+		document_.put("descripcion",proyecto.getDescripcion());
+		document_.put("direccion",proyecto.getDireccion());
+		document_.put("telefono",proyecto.getTelefono());
+		document_.put("fax",proyecto.getFax());
+		document_.put("email",proyecto.getEmail());
+		document_.put("active",proyecto.getActive());
+		document_.put("estado",proyecto.getEstado());
+		document_.put("tipocliente",proyecto.getTipocliente());
+ 
+	// Referenced of cliente
+		document_.put("cliente",clienteSupplier.toReferenced(proyecto.getCliente()));
+
+	// Embedded of sede
+		document_.put("sede",sedeSupplier.toDocument(proyecto.getSede()));
+
+	// Embedded of representante
+		document_.put("representante",representanteSupplier.toDocument(proyecto.getRepresentante()));
+		document_.put("fechaincial",proyecto.getFechaincial());
+		document_.put("fechafinal",proyecto.getFechafinal());
+
+	// Embedded List<actionHistory>
+		document_.put("actionHistory",actionHistorySupplier.toDocument(proyecto.getActionHistory()));
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Bson toUpdate (Proyecto proyecto) ">
+
+    public Bson toUpdate(Proyecto proyecto) {
+        Bson update_ = Filters.empty();
+        try {
+        update_ = Updates.combine(
+	 
+		Updates.set("idproyecto",proyecto.getIdproyecto()),
+		Updates.set("id",proyecto.getId()),
+ 
+	// ViewReferenced of departamentView
+		Updates.set("departament",departamentViewSupplier.toReferenced(proyecto.getDepartamentView())),
+		Updates.set("proyecto",proyecto.getProyecto()),
+		Updates.set("descripcion",proyecto.getDescripcion()),
+		Updates.set("direccion",proyecto.getDireccion()),
+		Updates.set("telefono",proyecto.getTelefono()),
+		Updates.set("fax",proyecto.getFax()),
+		Updates.set("email",proyecto.getEmail()),
+		Updates.set("active",proyecto.getActive()),
+		Updates.set("estado",proyecto.getEstado()),
+		Updates.set("tipocliente",proyecto.getTipocliente()),
+ 
+	// Referenced of cliente
+		Updates.set("cliente",clienteSupplier.toReferenced(proyecto.getCliente())),
+
+	// Embedded of sede
+		Updates.set("sede",sedeSupplier.toDocument(proyecto.getSede())),
+
+	// Embedded of representante
+		Updates.set("representante",representanteSupplier.toDocument(proyecto.getRepresentante())),
+		Updates.set("fechaincial",proyecto.getFechaincial()),
+		Updates.set("fechafinal",proyecto.getFechafinal()),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(proyecto.getActionHistory()))
+	
+
+        );
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return update_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Bson> toUpdate (List<Proyecto> proyectoList) ">
+
+    public List<Bson> toUpdate(List<Proyecto> proyectoList) {
+        List<Bson> bsonList_ = new ArrayList<>();
+        try {
+	 for(Proyecto proyecto : proyectoList){
+		 Bson update_ = Filters.empty();
+			update_ = Updates.combine(
+	 
+		Updates.set("idproyecto",proyecto.getIdproyecto()),
+		Updates.set("id",proyecto.getId()),
+ 
+	// ViewReferenced of departamentView
+		Updates.set("departament",departamentViewSupplier.toReferenced(proyecto.getDepartamentView())),
+		Updates.set("proyecto",proyecto.getProyecto()),
+		Updates.set("descripcion",proyecto.getDescripcion()),
+		Updates.set("direccion",proyecto.getDireccion()),
+		Updates.set("telefono",proyecto.getTelefono()),
+		Updates.set("fax",proyecto.getFax()),
+		Updates.set("email",proyecto.getEmail()),
+		Updates.set("active",proyecto.getActive()),
+		Updates.set("estado",proyecto.getEstado()),
+		Updates.set("tipocliente",proyecto.getTipocliente()),
+ 
+	// Referenced of cliente
+		Updates.set("cliente",clienteSupplier.toReferenced(proyecto.getCliente())),
+
+	// Embedded of sede
+		Updates.set("sede",sedeSupplier.toDocument(proyecto.getSede())),
+
+	// Embedded of representante
+		Updates.set("representante",representanteSupplier.toDocument(proyecto.getRepresentante())),
+		Updates.set("fechaincial",proyecto.getFechaincial()),
+		Updates.set("fechafinal",proyecto.getFechafinal()),
+
+	// Embedded List<actionHistory>
+		Updates.set("actionHistory",actionHistorySupplier.toDocument(proyecto.getActionHistory()))
+	
+
+        );
+		bsonList_.add(update_);
+ 
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return bsonList_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public Document toReferenced (Proyecto proyecto) ">
+
+    public Document toReferenced(Proyecto proyecto) {
+        Document document_ = new Document();
+        try {
+	 
+		document_.put("idproyecto",proyecto.getIdproyecto());
+	
+
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return document_;
+     }
+// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc=" public List<Document> toReferenced(List<Proyecto> proyectoList) ">
+
+    public List<Document> toReferenced(List<Proyecto> proyectoList) {
+        List<Document> documentList_ = new ArrayList<>();
+        try {
+	 
+	 for(Proyecto proyecto : proyectoList){
+		 Document document_ = new Document();
+		document_.put("idproyecto",proyecto.getIdproyecto());
+		documentList_.add(document_);
+	
+
+       }
+         } catch (Exception e) {
+              MessagesUtil.error(MessagesUtil.nameOfClassAndMethod() + " " + e.getLocalizedMessage());
+         }
+         return documentList_;
+     }
+// </editor-fold>
+
+}
